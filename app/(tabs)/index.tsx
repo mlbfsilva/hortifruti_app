@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { Text, View } from '@/components/Themed';
-import Carrossel from '@/components/Carrosel';
+import {CarroselPedidos} from '@/components/Carrosel';
 
 export default function TabOneScreen() {
   const cards = ['Frutas', 'Graõs e produtos naturais', 'Hortaliças', 'Raizes e temperos'];
@@ -17,15 +17,20 @@ export default function TabOneScreen() {
       </Text>
 
       <View style={styles.row}>
-        {cards.map((label, index) => (
-          <View
-            key={index}
-            style={[styles.box, index < cards.length - 1]}>
-            <Text style={styles.cardText}>{label}</Text>
-          </View>
-        ))}
-      </View>
-      <Carrossel /> 
+  {cards.map((label, index) => (
+    <View
+      key={index}
+      style={[
+        styles.box,
+        index < cards.length - 1 ? { marginRight: 8 } : null
+      ]}
+    >
+      <Text style={styles.cardText}>{label}</Text>
+    </View>
+  ))}
+</View>
+
+      <CarroselPedidos /> 
 
     </View>
   );

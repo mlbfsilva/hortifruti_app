@@ -1,54 +1,123 @@
-// components/Carrossel.tsx
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 
-export default function Carrossel() {
-  return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.container}>
-      <View style={styles.card}>
-        <Card1/>
+import { View, Text, Image, StyleSheet, TouchableOpacity, ListRenderItem, FlatList } from 'react-native';
+import Animated from 'react-native-reanimated';
+
+
+const pedidos: Pedido[] = [
+  {
+    id: "001",
+    loja: "Horta em Casa",
+    image: '../assets/images/hortifruti-logo.png',
+    valor: 'R$ 45,90',
+  },
+  {
+    id: "002",
+    loja: "Frutaria da Maria",
+    image: '../assets/images/hortifruti-logo.png',
+    valor: 'R$ 102,50',
+  },
+  {
+    id: "003",
+    loja: "Hortifruti Mais Mais",
+    image: '../assets/images/hortifruti-logo.png',
+    valor: 'R$ 24,69',
+  },
+  {
+    id: "004",
+    loja: "Hortifruti.com",
+    image: '../assets/images/hortifruti-logo.png',
+    valor: 'R$ 55,00',
+  },
+]
+type Pedido ={
+  id: string;
+  loja: string;
+  image: any;
+  valor: string;
+};
+
+export const CarroselPedidos = () => {
+  const renderItem: ListRenderItem<Pedido> = ({ item }) => (
+    <View style={styles.card}>
+      <Image source={item.image} style={styles.imagem} />
+      <View style={styles.info}>
+        <Text style={styles.idPedido}>Pedido #{item.id}</Text>
+        <Text style={styles.nomeLoja}>{item.loja}</Text>
+        <Text style={styles.valor}>{item.valor}</Text>
+        </View>
         <TouchableOpacity style={styles.botao}>
-          <Text style={styles.textoBotao}>Pedir novamente</Text>
+          <Text style={styles.textoBotao}>Pedir Novamente</Text>
         </TouchableOpacity>
-      </View>
-    </ScrollView>
+      
+    </View>
+  );
+  return (
+    <FlatList 
+    data={pedidos}
+    renderItem={renderItem}
+    keyExtractor={(item)=> item.id}
+    horizontal showsHorizontalScrollIndicator={false}
+    contentContainerStyle={styles.container}
+    />
   );
 }
 
-function Card1(){
-  return <View style={[styles.card,{backgroundColor: '#fff'}]}/>;
-}
-
-function Botao(){
-  return <View style={[styles.botao]}/>
-}
 const styles = StyleSheet.create({
   container: {
-    marginTop: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 16,
   },
-  card: {
-    width: 200,
-    height: 108,
-    flexShrink: 0,
-    borderRadius: 10,
+  
+  card:{
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
     padding: 12,
     marginRight: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
     elevation: 3,
-    alignItems: 'center',
-  },  
-  botao: {
-    backgroundColor: '#999',
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 5,
+    shadowColor: '#000',
+    shadowOffset: {width: 1, height: 1},
+    shadowRadius: 3,
+    minWidth: 280
   },
-  textoBotao: {
-    color: 'white',
+
+  imagem:{
+    width: 54,
+    height: 54,
+    borderRadius: 24,
+    marginRight: 12,
+  },
+
+  info:{
+    flex: 1,
+  },
+
+  idPedido:{
     fontSize: 12,
+    color: '#888',
   },
-});
+
+  nomeLoja:{
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333,'
+  },
+
+  valor:{
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#555',
+  },
+
+  botao:{
+    backgroundColor: '#5994d4',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 16, 
+  },
+
+  textoBotao:{
+    color: '#fff',
+    fontSize: 16,
+  },
+})
