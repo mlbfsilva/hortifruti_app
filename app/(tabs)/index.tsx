@@ -1,36 +1,17 @@
 import { StyleSheet } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import {CarroselPedidos} from '@/components/Carrosel';
+import CarroselCategorias from '@/components/CarroselPromo';
 
 export default function TabOneScreen() {
-  const cards = ['Frutas', 'Graõs e produtos naturais', 'Hortaliças', 'Raizes e temperos'];
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Endereço</Text>
-
-      <Text
-        style={styles.getStartedText}
-        lightColor="rgba(0,0,0,0.8)"
-        darkColor="rgba(255,255,255,0.8)">
-        Promoção do dia:
-      </Text>
-
-      <View style={styles.row}>
-  {cards.map((label, index) => (
-    <View
-      key={index}
-      style={[
-        styles.box,
-        index < cards.length - 1 ? { marginRight: 8 } : null
-      ]}
-    >
-      <Text style={styles.cardText}>{label}</Text>
-    </View>
-  ))}
-</View>
-
-      <CarroselPedidos /> 
+      <CarroselCategorias/>
+      
+      <CarroselPedidos/>
+      
 
     </View>
   );
