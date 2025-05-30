@@ -11,7 +11,7 @@ export default function WelcomeScreen() {
     
     }
     if (option === 'Parceiros'){
-      router.replace('/parceiros/cadastro');
+      router.replace('/parceiros/login');
     }
     else {
       console.log(`Selecionou: ${option}`);

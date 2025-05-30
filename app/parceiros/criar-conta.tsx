@@ -1,0 +1,8 @@
+import React, { useState } from "react";
+import { StyleSheet, View, TextInput, TouchableOpacity, Text, Alert} from 'react-native';
+import { router } from 'expo-router';
+import { AntDesign } from '@expo/vector-icons';
+
+export default function criarContaParceiros(){
+    
+}

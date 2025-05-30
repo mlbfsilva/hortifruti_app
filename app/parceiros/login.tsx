@@ -3,7 +3,7 @@ import { StyleSheet, View, TextInput, TouchableOpacity, Text, Alert} from 'react
 import { router } from 'expo-router';
 import { AntDesign } from '@expo/vector-icons';
 
-export default function cadastroParceiros(){
+export default function loginParceiros(){
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
 
