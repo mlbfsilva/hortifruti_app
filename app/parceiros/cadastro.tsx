@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, View, TextInput, TouchableOpacity, Text, Alert } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity, Text, Alert} from 'react-native';
 import { router } from 'expo-router';
 import { AntDesign } from '@expo/vector-icons';
 
@@ -8,7 +8,7 @@ export default function cadastroParceiros(){
     const [senha, setSenha] = useState('');
 
     const handleVoltar = () => {
-        router.back();
+        router.push('/screens/WelcomeScreen');
     };
 
     const handleEntrar = () => {
@@ -35,12 +35,7 @@ export default function cadastroParceiros(){
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Login</Text>
             </View>
-            <View style={styles.pageTitle}>
-                <Text>Cadastro para Parceiros</Text>
-            </View>
-            <View style={styles.pageParagrafo}>
-                <Text>ara iniciar o cadastro informe o e-mail e a senha que será usada para acesso ao aplicativo</Text>
-            </View>
+    
             <View style={styles.formContainer}>
             <Text style={styles.label}>Email:</Text>
                 <TextInput
