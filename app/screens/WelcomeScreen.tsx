@@ -8,7 +8,12 @@ export default function WelcomeScreen() {
   const handleOptionPress = (option: string) => {
     if (option === 'Entregador') {
       router.replace('/entregador/cadastro');
-    } else {
+    
+    }
+    if (option === 'Parceiros'){
+      router.replace('/parceiros/login');
+    }
+    else {
       console.log(`Selecionou: ${option}`);
     }
   };
