@@ -1,16 +1,19 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import ProductListScreen from '../screens/ProductListScreen';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native'; // <--- Importe StyleSheet também
+
+// IMPORTE OS SEUS STACKS REAIS
 import ProductStack from './ProductStack';
+import ProfileStack from './ProfileStack';
 
 const Tab = createBottomTabNavigator();
 
+// Componente Placeholder com fundo e texto bem visíveis para depuração
 function Placeholder({ title }: { title: string }) {
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>{title}</Text>
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'purple' }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'white' }}>{title}</Text>
     </View>
   );
 }
@@ -30,12 +33,13 @@ export default function BottomTabs() {
         tabBarActiveTintColor: '#222',
         tabBarInactiveTintColor: '#aaa',
         headerShown: false,
+       
       })}
     >
       <Tab.Screen name="Pedidos" children={() => <Placeholder title="Pedidos" />} />
       <Tab.Screen name="Dashboard" children={() => <Placeholder title="Dashboard" />} />
       <Tab.Screen name="Produtos" component={ProductStack} />
-      <Tab.Screen name="Perfil" children={() => <Placeholder title="Perfil" />} />
+      <Tab.Screen name="Perfil" component={ProfileStack} />
     </Tab.Navigator>
   );
-} 
+}
