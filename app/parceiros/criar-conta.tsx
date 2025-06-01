@@ -17,14 +17,12 @@ export default function criarContaParceiros(){
 );
             return;
         }
+        router.push('/parceiros/criar-conta-info');
     }
     const handleVoltar = () => {
         router.back();
     };
 
-    const handleProximaPagina = () => {
-      router.push('./parceiros/criar-conta-info');
-    }
 
     return(
         <View style={styles.container}>
@@ -66,7 +64,7 @@ export default function criarContaParceiros(){
                                 placeholder="********"
                               />
 
-                              <TouchableOpacity style={styles.confimButton} onPress={handleProximaPagina}>
+                              <TouchableOpacity style={styles.confimButton} onPress={handleConfirmar}>
                                 <Text style={styles.confirmButtonText}>Próximo</Text>
                               </TouchableOpacity>
 
