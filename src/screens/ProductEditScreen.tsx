@@ -1,12 +1,57 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { RouteProp } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
-export default function ProductEditScreen() {
-  const [unit, setUnit] = useState<'Kg' | 'Unid.'>('Kg');
-  const [name, setName] = useState('Banana');
-  const [type, setType] = useState('Fruta');
-  const [price, setPrice] = useState('5,90');
+type RootStackParamList = {
+  EditProduct: { product: {
+    id: string;
+    name: string;
+    type: string;
+    price: number;
+    unit: 'Kg' | 'Unid.' | string;
+  }};
+  // ... outras rotas se necessário
+};
+
+type ProductEditScreenRouteProp = RouteProp<RootStackParamList, 'EditProduct'>;
+
+type Props = {
+  route: ProductEditScreenRouteProp;
+};
+
+export default function ProductEditScreen({ route }: Props) {
+  const navigation = useNavigation();
+  const { product } = route.params;
+
+  const [unit, setUnit] = useState<'Kg' | 'Unid.'>(product.unit === 'Kg' ? 'Kg' : 'Unid.');
+  const [name, setName] = useState(product.name);
+  const [type, setType] = useState(product.type);
+  const [price, setPrice] = useState(product.price.toString().replace('.', ','));
+
+  const handleSave = () => {
+    Alert.alert('Sucesso', 'Produto atualizado com sucesso!');
+    navigation.goBack();
+  };
+
+  const handleDelete = () => {
+    Alert.alert(
+      'Excluir Produto',
+      'Tem certeza que deseja excluir este produto?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert('Excluído', 'Produto excluído com sucesso!');
+            navigation.goBack();
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -39,10 +84,10 @@ export default function ProductEditScreen() {
           <Text style={[styles.unitButtonText, unit === 'Unid.' && styles.unitButtonTextActive]}>Unid.</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.saveButton}>
+      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>Salvar Alterações</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.deleteButton}>
+      <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
         <Text style={styles.deleteButtonText}>Excluir Produto</Text>
       </TouchableOpacity>
     </View>

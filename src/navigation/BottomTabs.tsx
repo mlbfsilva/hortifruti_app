@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import ProductListScreen from '../screens/ProductListScreen';
 import { View, Text } from 'react-native';
+import ProductStack from './ProductStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -33,7 +34,7 @@ export default function BottomTabs() {
     >
       <Tab.Screen name="Pedidos" children={() => <Placeholder title="Pedidos" />} />
       <Tab.Screen name="Dashboard" children={() => <Placeholder title="Dashboard" />} />
-      <Tab.Screen name="Produtos" component={ProductListScreen} />
+      <Tab.Screen name="Produtos" component={ProductStack} />
       <Tab.Screen name="Perfil" children={() => <Placeholder title="Perfil" />} />
     </Tab.Navigator>
   );

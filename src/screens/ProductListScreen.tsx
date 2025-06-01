@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 const mockProducts = [
   { id: '1', name: 'Banana', type: 'Fruta', price: 5.9, unit: 'Kg' },
@@ -8,7 +9,31 @@ const mockProducts = [
   { id: '3', name: 'Alface', type: 'Verdura', price: 3.2, unit: 'Unidade' },
   { id: '4', name: 'Tomate', type: 'Fruta', price: 4.8, unit: 'Kg' },
 ];
-export default function ProductListScreen() {
+
+// Defina o tipo das rotas do seu stack
+type RootStackParamList = {
+  ProductList: undefined;
+  EditProduct: { product: {
+    id: string;
+    name: string;
+    type: string;
+    price: number;
+    unit: 'Kg' | 'Unid.' | string;
+  }};
+  // ... outras rotas se necessário
+};
+
+// Defina o tipo do navigation para esta tela
+type ProductListScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'ProductList'
+>;
+
+type Props = {
+  navigation: ProductListScreenNavigationProp;
+};
+
+export default function ProductListScreen({ navigation }: Props) {
   const [search, setSearch] = useState('');
 
   // Filtra os produtos conforme o texto digitado
@@ -41,7 +66,9 @@ export default function ProductListScreen() {
               <Text style={styles.productType}>Tipo: {item.type}</Text>
               <Text style={styles.productPrice}>Preço: R$ {item.price.toFixed(2)} {item.unit}</Text>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('EditProduct', { product: item })}
+            >
               <Ionicons name="pencil" size={22} color="#444" />
             </TouchableOpacity>
           </View>
