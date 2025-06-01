@@ -4,26 +4,15 @@ import { router } from 'expo-router';
 import { AntDesign } from '@expo/vector-icons';
 
 export default function criarContaParceiros(){
-    const [nomeParceiro, setNomeParceiro] = useState();
-    const [segunda, setSegunda] = useState();
-    const [segundafim, setSegundaFim] = useState();
-    const [tercafim, setTercaFim] = useState();
-    const [quarta, setQuarta] = useState();
-    const [quartafim, setQuartaFim] = useState();
-    const [quinta, setQuinta] = useState();
-    const [quintafim, setQuintaFim] = useState();
-    const [sexta, setSexta] = useState();
-    const [sextafim, setSextaFim] = useState();
-    const [sabado, sexSabado] = useState();
-    const [sabadofim, sexSabadoFim] = useState();
-    const [domingo, setDomingo] = useState();
-    const [domingofim, setDomingoFim] = useState();
+    const [email, setEmail] = useState('');
+    const [senha, setSenha] = useState('');
+    const [confimarsenha, setConfirmarSenha] = useState('');
 
     const handleConfirmar = () => {
-        if (!nomeParceiro) {
+        if (!email || !senha || !confimarsenha) {
             Alert.alert(
             "Atenção",
-            "Campo nome incompleto. Para avançar, preencha o campo corretamente.",
+            "Campos incompletos. Para avançar, preencha o campo corretamente.",
             [{ text: "OK" }]
 );
             return;
@@ -33,17 +22,54 @@ export default function criarContaParceiros(){
         router.back();
     };
 
+    const handleProximaPagina = () => {
+      router.push('./parceiros/criar-conta-info');
+    }
+
     return(
         <View style={styles.container}>
-            <View style={styles.header}>
+            {/* <View style={styles.header}>
                 <TouchableOpacity onPress={handleVoltar} style={styles.backButton}>
                 <AntDesign name="left" size={24} color="black" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Cadastro</Text>
-            </View>
+            </View> */}
             <View style={styles.infoPage}>
                 <Text style={styles.pageTitle}>Cadastro para Parceiros</Text>
                 <Text style={styles.pageParagrafo}>Para iniciar o cadastro informe o e-mail e a senha que será usada para acessar o aplicativo</Text>
+            </View>
+            <View style={styles.formContainer}>
+              <Text style={styles.label}>Email:</Text>
+                              <TextInput
+                                  style={styles.input}
+                                  value={email}
+                                  onChangeText={setEmail}
+                                  keyboardType="email-address"
+                                  autoCapitalize="none"
+                              />
+                      
+                              <Text style={styles.label}>Senha:</Text>
+                              <TextInput
+                                  style={styles.input}
+                                  value={senha}
+                                  onChangeText={setSenha}
+                                  secureTextEntry
+                                  placeholder="********"
+                              />
+
+                              <Text style={styles.label}>Digite a senha novamente:</Text>
+                              <TextInput 
+                                style={styles.input}
+                                value={confimarsenha}
+                                onChangeText={setConfirmarSenha}
+                                secureTextEntry
+                                placeholder="********"
+                              />
+
+                              <TouchableOpacity style={styles.confimButton} onPress={handleProximaPagina}>
+                                <Text style={styles.confirmButtonText}>Próximo</Text>
+                              </TouchableOpacity>
+
             </View>
         </View>
     )
@@ -60,6 +86,38 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+  },
+  formContainer: {
+    flex: 1,
+    padding: 20,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: '#000',
+  },
+  input: {
+    width: '100%',
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginBottom: 20,
+    paddingHorizontal: 10,
+  },
+  confimButton: {
+    width: '100%',
+    height: 48,
+    backgroundColor: '#1DFF3F',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  confirmButtonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   backButton: {
     marginRight: 16,
