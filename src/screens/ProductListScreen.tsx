@@ -1,24 +1,36 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const mockProducts = [
   { id: '1', name: 'Banana', type: 'Fruta', price: 5.9, unit: 'Kg' },
-  { id: '2', name: 'Banana', type: 'Fruta', price: 5.9, unit: 'Kg' },
-  { id: '3', name: 'Banana', type: 'Fruta', price: 5.9, unit: 'Kg' },
-  { id: '4', name: 'Banana', type: 'Fruta', price: 5.9, unit: 'Kg' },
+  { id: '2', name: 'Maçã', type: 'Fruta', price: 6.5, unit: 'Kg' },
+  { id: '3', name: 'Alface', type: 'Verdura', price: 3.2, unit: 'Unidade' },
+  { id: '4', name: 'Tomate', type: 'Fruta', price: 4.8, unit: 'Kg' },
 ];
-
 export default function ProductListScreen() {
+  const [search, setSearch] = useState('');
+
+  // Filtra os produtos conforme o texto digitado
+  const filteredProducts = mockProducts.filter(product =>
+    product.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Produtos</Text>
       <View style={styles.searchBar}>
         <Ionicons name="search" size={20} color="#888" style={{ marginLeft: 8 }} />
-        <Text style={{ color: '#888', marginLeft: 8 }}>Pesquisar</Text>
+        <TextInput
+          style={{ flex: 1, color: '#222', marginLeft: 8 }}
+          placeholder="Pesquisar"
+          placeholderTextColor="#888"
+          value={search}
+          onChangeText={setSearch}
+        />
       </View>
       <FlatList
-        data={mockProducts}
+        data={filteredProducts}
         keyExtractor={item => item.id}
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 16 }}
