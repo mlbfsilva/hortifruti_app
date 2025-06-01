@@ -20,6 +20,7 @@ type RootStackParamList = {
     price: number;
     unit: 'Kg' | 'Unid.' | string;
   }};
+  CreateProduct: undefined;
   // ... outras rotas se necessário
 };
 
@@ -74,7 +75,10 @@ export default function ProductListScreen({ navigation }: Props) {
           </View>
         )}
       />
-      <TouchableOpacity style={styles.addButton}>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => navigation.navigate('CreateProduct')}
+      >
         <Text style={styles.addButtonText}>Adicionar Produto</Text>
       </TouchableOpacity>
     </View>

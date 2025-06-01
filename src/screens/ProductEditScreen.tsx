@@ -1,28 +1,21 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { RouteProp } from '@react-navigation/native';
-import { useNavigation } from '@react-navigation/native';
+// MUITO IMPORTANTE: Mude para StackScreenProps do '@react-navigation/stack'
+import { StackScreenProps } from '@react-navigation/stack';
 
-type RootStackParamList = {
-  EditProduct: { product: {
-    id: string;
-    name: string;
-    type: string;
-    price: number;
-    unit: 'Kg' | 'Unid.' | string;
-  }};
-  // ... outras rotas se necessário
-};
+// Importe ProductStackParamList do arquivo onde ela foi definida e exportada
+import { ProductStackParamList } from '../navigation/ProductStack'; // <--- VERIFIQUE ESTE CAMINHO
 
-type ProductEditScreenRouteProp = RouteProp<RootStackParamList, 'EditProduct'>;
+// Defina o tipo das props do componente de tela usando StackScreenProps
+// O primeiro argumento é a sua ProductStackParamList, o segundo é o nome da rota específica
+type ProductEditScreenProps = StackScreenProps<ProductStackParamList, 'EditProduct'>;
 
-type Props = {
-  route: ProductEditScreenRouteProp;
-};
+// O componente agora recebe 'route' e 'navigation' diretamente como props.
+// O hook useNavigation() é REMOVIDO daqui.
+export default function ProductEditScreen({ route, navigation }: ProductEditScreenProps) {
+  // const navigation = useNavigation(); // <--- REMOVA ESTA LINHA
 
-export default function ProductEditScreen({ route }: Props) {
-  const navigation = useNavigation();
   const { product } = route.params;
 
   const [unit, setUnit] = useState<'Kg' | 'Unid.'>(product.unit === 'Kg' ? 'Kg' : 'Unid.');
@@ -31,6 +24,7 @@ export default function ProductEditScreen({ route }: Props) {
   const [price, setPrice] = useState(product.price.toString().replace('.', ','));
 
   const handleSave = () => {
+    // Aqui você faria a lógica para salvar as alterações do produto
     Alert.alert('Sucesso', 'Produto atualizado com sucesso!');
     navigation.goBack();
   };
@@ -45,6 +39,7 @@ export default function ProductEditScreen({ route }: Props) {
           text: 'Excluir',
           style: 'destructive',
           onPress: () => {
+            // Aqui você faria a lógica para excluir o produto
             Alert.alert('Excluído', 'Produto excluído com sucesso!');
             navigation.goBack();
           },
@@ -158,26 +153,25 @@ const styles = StyleSheet.create({
   saveButton: {
     backgroundColor: '#19C37D',
     borderRadius: 8,
-    paddingVertical: 14,
+    paddingVertical: 12,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 20,
   },
   saveButtonText: {
     color: '#fff',
-    fontWeight: '600',
     fontSize: 16,
+    fontWeight: '600',
   },
   deleteButton: {
-    borderColor: '#FF3B30',
-    borderWidth: 1.5,
+    backgroundColor: '#FF6347',
     borderRadius: 8,
-    paddingVertical: 14,
+    paddingVertical: 12,
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 10,
   },
   deleteButtonText: {
-    color: '#FF3B30',
-    fontWeight: '600',
+    color: '#fff',
     fontSize: 16,
+    fontWeight: '600',
   },
-}); 
+});
