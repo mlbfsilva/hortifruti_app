@@ -22,7 +22,7 @@ export default function CriarContaParceiroFormaPagamento() {
     Alert.alert(
       "Pagamento(s) selecionado(s)",
       selecionados.join(", "),
-      [{ text: "OK", onPress: () => router.push("./proximaEtapa") }]
+      [{ text: "OK", onPress: () => router.push('/parceiros/criar-conta-analise') }]
     );
   };
 
