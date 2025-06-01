@@ -34,7 +34,7 @@ export default function criarContaParceirosInfo(){
             return;
         }
 
-        router.push('./parceiros/criar-conta-endereco')
+        router.push('/parceiros/criar-conta-endereco')
     }
     /* const handleProximaPagina = () => {
           router.push('./parceiros/criar-conta-info');
