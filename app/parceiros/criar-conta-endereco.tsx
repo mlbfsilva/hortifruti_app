@@ -15,7 +15,7 @@ export default function criarContaParceirosEndereco(){
     const [complemento, setComplemento] = useState('');
 
     const handleConfirmar = () => {
-        router.push('./parceiros/criar-conta-forma-pagamento')
+        router.push('/parceiros/criar-conta-forma-pagamento')
     }
 
     return (
