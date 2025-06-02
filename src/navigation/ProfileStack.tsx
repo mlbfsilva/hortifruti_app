@@ -5,12 +5,10 @@ import StoreProfileScreen from '../screens/StoreProfileScreen';
 import EditStoreInfoScreen from '../screens/EditStoreInfoScreen';
 import EditAddressScreen from '../screens/EditAddressScreen';
 import EditPaymentMethodsScreen from '../screens/EditPaymentMethodsScreen';
-// NOVAS IMPORTAÇÕES PARA AS TELAS DE PROMOÇÃO
-import PromotionsScreen from '../screens/PromotionsScreen'; // Vamos criar esta tela
-import EditPromotionScreen from '../screens/EditPromotionScreen'; // Vamos criar esta tela
+import PromotionsScreen from '../screens/PromotionsScreen';
+import EditPromotionScreen from '../screens/EditPromotionScreen';
 
 
-// Importar os tipos de perfil e o novo tipo Promotion
 import { StoreProfile, StoreAddress, PaymentMethods, Promotion } from '../types/profile';
 
 // 1. DEFINE E EXPORTE O TIPO DOS PARÂMETROS DA SUA PILHA DE PERFIL
@@ -19,9 +17,9 @@ export type ProfileStackParamList = {
   EditStoreInfo: { profile: StoreProfile };
   EditAddress: { address: StoreAddress };
   EditPaymentMethods: { paymentMethods: PaymentMethods };
-  // NOVAS ROTAS PARA PROMOÇÕES
-  Promotions: undefined; // A tela de lista de promoções não recebe parâmetros iniciais
-  EditPromotion: { promotion: Promotion }; // A tela de edição de promoção recebe um objeto Promotion
+  Promotions: undefined;
+  // CORREÇÃO: Torne o parâmetro 'promotion' opcional usando '?'
+  EditPromotion: { promotion?: Promotion }; // <--- AQUI ESTÁ A CORREÇÃO NECESSÁRIA
   // Outras rotas relacionadas ao perfil podem ser adicionadas aqui
 };
 
@@ -34,7 +32,6 @@ export default function ProfileStack() {
       initialRouteName="StoreProfile"
       screenOptions={{
         headerShown: false,
-        // contentStyle: { backgroundColor: 'lightgreen' }, // Remova esta linha de depuração se ainda estiver aqui
       }}
     >
       <Stack.Screen
@@ -57,7 +54,6 @@ export default function ProfileStack() {
         component={EditPaymentMethodsScreen}
         options={{ headerShown: false }}
       />
-      {/* NOVAS TELAS DE PROMOÇÃO */}
       <Stack.Screen
         name="Promotions"
         component={PromotionsScreen}

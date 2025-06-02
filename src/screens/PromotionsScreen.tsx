@@ -1,10 +1,10 @@
 // src/screens/PromotionsScreen.tsx
-import React, { useState } from 'react'; // Importar useState
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
-import { useFocusEffect } from '@react-navigation/native'; // <--- IMPORTAR useFocusEffect
-import { useCallback } from 'react'; // <--- IMPORTAR useCallback
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
 import { ProfileStackParamList } from '../navigation/ProfileStack';
 import { Promotion } from '../types/profile';
@@ -35,6 +35,12 @@ export default function PromotionsScreen({ navigation }: PromotionsScreenProps) 
       };
     }, [])
   );
+
+  const handleAddPromotion = () => { // Função para adicionar nova promoção
+    // Navega para a tela EditPromotion sem passar um objeto 'promotion',
+    // indicando que é uma nova promoção a ser criada.
+    navigation.navigate('EditPromotion', {});
+  };
 
   return (
     <View style={styles.container}>
@@ -68,7 +74,7 @@ export default function PromotionsScreen({ navigation }: PromotionsScreenProps) 
 
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => { /* Lógica para adicionar nova promoção (navegar para EditPromotion sem params) */ }}
+        onPress={handleAddPromotion} // <--- ATUALIZADO: Chama a nova função
       >
         <Text style={styles.addButtonText}>Adicionar Produto</Text>
       </TouchableOpacity>

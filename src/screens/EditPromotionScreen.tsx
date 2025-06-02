@@ -4,43 +4,60 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'reac
 import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
 
-// Importar a lista de parâmetros do ProfileStack
 import { ProfileStackParamList } from '../navigation/ProfileStack';
-
-// IMPORTAR O TIPO 'Promotion' DIRETAMENTE DE 'src/types/profile.ts'
 import { Promotion } from '../types/profile';
 
-// IMPORTAR O NOVO COMPONENTE ConfirmationModal
+// IMPORTAR OS COMPONENTES DE MODAL
 import ConfirmationModal from '../components/ConfirmationModal';
+import SuccessModal from '../components/SuccessModal';
 
 // Importar a lista mockada de promoções para simular a exclusão
-import { mockPromotionsData } from './PromotionsScreen'; // <--- NOVO
+import { mockPromotionsData } from './PromotionsScreen';
 
 // Função simulada para remover uma promoção (simula uma chamada de API)
 const simulateDeletePromotionApi = async (promotionId: string): Promise<boolean> => {
   return new Promise((resolve) => {
-    setTimeout(() => { // Simula um atraso de rede
+    setTimeout(() => {
       const initialLength = mockPromotionsData.length;
       const index = mockPromotionsData.findIndex(p => p.id === promotionId);
       if (index > -1) {
-        mockPromotionsData.splice(index, 1); // Remove o item
+        mockPromotionsData.splice(index, 1);
         console.log(`Promoção ${promotionId} removida da lista mockada.`);
-        resolve(true); // Sucesso
+        resolve(true);
       } else {
         console.log(`Promoção ${promotionId} não encontrada na lista mockada.`);
-        resolve(false); // Falha (não encontrado)
+        resolve(false);
       }
-    }, 500); // 0.5 segundos de atraso
+    }, 500);
   });
 };
-// --- FIM DOS DADOS MOCKADOS ---
+
+// Função simulada para adicionar/atualizar uma promoção
+const simulateSavePromotionApi = async (promotion: Promotion, isNew: boolean): Promise<boolean> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      if (isNew) {
+        mockPromotionsData.push(promotion);
+        console.log('Nova promoção adicionada à lista mockada:', promotion);
+      } else {
+        const index = mockPromotionsData.findIndex(p => p.id === promotion.id);
+        if (index > -1) {
+          mockPromotionsData[index] = promotion;
+          console.log('Promoção atualizada na lista mockada:', promotion);
+        } else {
+          console.log('Promoção não encontrada para atualização, adicionando como nova:', promotion);
+          mockPromotionsData.push(promotion);
+        }
+      }
+      resolve(true);
+    }, 500);
+  });
+};
 
 
-// Definir o tipo das props para esta tela
 type EditPromotionScreenProps = StackScreenProps<ProfileStackParamList, 'EditPromotion'>;
 
 export default function EditPromotionScreen({ route, navigation }: EditPromotionScreenProps) {
-  // A promoção pode vir via params se estiver editando, ou ser nova
   const initialPromotion = route.params?.promotion;
 
   const [productName, setProductName] = useState(initialPromotion?.productName || '');
@@ -48,12 +65,15 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
   const [promotionPrice, setPromotionPrice] = useState(initialPromotion?.promotionPrice?.toString().replace('.', ',') || '');
   const [unit, setUnit] = useState<'Kg' | 'Unid.'>(initialPromotion?.unit === 'Kg' ? 'Kg' : 'Unid.');
 
-  const isEditing = !!initialPromotion; // Verifica se está editando ou criando
+  const isEditing = !!initialPromotion;
 
-  // ESTADO PARA CONTROLAR A VISIBILIDADE DO MODAL DE EXCLUSÃO
-  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false); // <--- NOVO
+  // ESTADOS PARA CONTROLAR A VISIBILIDADE DOS MODAIS
+  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
-  const handleSave = () => {
+
+  const handleSave = async () => {
     if (productName.trim() === '' || productType.trim() === '' || promotionPrice.trim() === '') {
       Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
       return;
@@ -66,34 +86,77 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
     }
 
     const newOrUpdatedPromotion: Promotion = {
-      id: initialPromotion?.id || Date.now().toString(), // Gera um ID simples para novos
-      productId: initialPromotion?.productId || 'new-product-id', // Você precisaria de um seletor de produto real
+      id: initialPromotion?.id || Date.now().toString(),
+      productId: initialPromotion?.productId || 'new-product-id',
       productName,
       productType,
       promotionPrice: priceValue,
       unit,
     };
 
-    if (isEditing) {
-      console.log('Promoção atualizada:', newOrUpdatedPromotion);
-      Alert.alert('Sucesso', 'Promoção atualizada com sucesso!');
-    } else {
-      console.log('Nova promoção adicionada:', newOrUpdatedPromotion);
-      Alert.alert('Sucesso', 'Promoção adicionada com sucesso!');
+    let success = false;
+
+    // --- CÓDIGO REAL (COM BACKEND) - COMENTADO ---
+    /*
+    try {
+      const method = isEditing ? 'PUT' : 'POST';
+      const url = isEditing ? `https://sua-api.com/promocoes/${newOrUpdatedPromotion.id}` : 'https://sua-api.com/promocoes';
+      console.log(`Tentando ${isEditing ? 'atualizar' : 'adicionar'} promoção ao backend:`, newOrUpdatedPromotion);
+
+      const response = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newOrUpdatedPromotion),
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log(`Promoção ${isEditing ? 'atualizada' : 'adicionada'} com sucesso ao backend:`, responseData);
+        success = true;
+      } else {
+        const errorData = await response.json();
+        console.error(`Erro ao ${isEditing ? 'atualizar' : 'adicionar'} promoção no backend:`, response.status, errorData);
+        Alert.alert('Erro', `Não foi possível ${isEditing ? 'salvar' : 'adicionar'} a promoção: ${errorData.message || 'Tente novamente.'}`);
+        success = false;
+      }
+    } catch (error) {
+      console.error('Erro de rede ou na requisição de salvar promoção:', error);
+      Alert.alert('Erro', 'Erro de conexão. Tente novamente.');
+      success = false;
     }
-    navigation.goBack();
+    */
+    // --- FIM DO CÓDIGO REAL (COM BACKEND) - COMENTADO ---
+
+    // --- CÓDIGO DE SIMULAÇÃO (ATIVO) ---
+    if (!success) {
+      success = await simulateSavePromotionApi(newOrUpdatedPromotion, !isEditing);
+    }
+    // --- FIM DO CÓDIGO DE SIMULAÇÃO ---
+
+
+    if (success) {
+      setSuccessMessage(isEditing ? 'Promoção atualizada com Sucesso!' : 'Promoção Adicionada com Sucesso!');
+      setSuccessModalVisible(true);
+    } else {
+      // Se a simulação falhar (o que não deve acontecer aqui), ou o código real falhar
+      console.log(`Falha ao ${isEditing ? 'salvar' : 'adicionar'} promoção.`);
+      // Alert.alert já é chamado dentro do try/catch do código real, ou você pode adicionar um aqui
+    }
   };
 
-  // FUNÇÃO PARA ABRIR O MODAL DE CONFIRMAÇÃO DE EXCLUSÃO
+  const handleAdvanceFromSuccessModal = () => {
+    setSuccessModalVisible(false);
+    navigation.goBack(); // Volta para a tela anterior (PromotionsScreen)
+  };
+
   const handleDelete = () => {
-    setDeleteModalVisible(true); // <--- SUBSTITUI Alert.alert
+    setDeleteModalVisible(true);
   };
 
-  // FUNÇÃO PARA CONFIRMAR A EXCLUSÃO (chamada pelo modal)
-  const confirmDelete = async () => { // <--- AGORA É ASYNC
-    setDeleteModalVisible(false); // Fecha o modal imediatamente
+  const confirmDelete = async () => {
+    setDeleteModalVisible(false);
 
-    let success = false; // Variável para controlar o resultado da exclusão
+    let success = false;
 
     // --- CÓDIGO REAL (COM BACKEND) - COMENTADO ---
     /*
@@ -101,31 +164,29 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
       console.log(`Tentando excluir promoção ${initialPromotion?.id} do backend...`);
       const response = await fetch(`https://sua-api.com/promocoes/${initialPromotion?.id}`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          // 'Authorization': `Bearer ${seuTokenDeAutenticacao}`, // Se precisar de autenticação
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
 
-      if (response.ok) { // Verifica se a resposta foi 2xx (sucesso)
+      if (response.ok) {
         console.log(`Promoção ${initialPromotion?.productName} excluída com sucesso do backend.`);
-        success = true; // Define success como true se a API retornar sucesso
+        success = true;
       } else {
-        const errorData = await response.json(); // Tenta ler a mensagem de erro da API
+        const errorData = await response.json();
         console.error('Erro ao excluir promoção no backend:', response.status, errorData);
-        success = false; // Define success como false em caso de erro da API
+        Alert.alert('Erro', `Não foi possível excluir a promoção: ${errorData.message || 'Tente novamente.'}`);
+        success = false;
       }
     } catch (error) {
       console.error('Erro de rede ou na requisição de exclusão:', error);
-      success = false; // Define success como false em caso de erro de rede
+      Alert.alert('Erro', 'Erro de conexão. Tente novamente.');
+      success = false;
     }
     */
     // --- FIM DO CÓDIGO REAL (COM BACKEND) - COMENTADO ---
 
     // --- CÓDIGO DE SIMULAÇÃO (ATIVO) ---
-    // Este bloco só é executado se o bloco de código real acima estiver comentado.
-    if (!success) { // Se o código real não foi executado ou falhou
-      if (initialPromotion?.id) { // Garante que há um ID para excluir
+    if (!success) {
+      if (initialPromotion?.id) {
         success = await simulateDeletePromotionApi(initialPromotion.id);
       } else {
         console.error('ID da promoção não encontrado para exclusão simulada.');
@@ -134,20 +195,15 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
     }
     // --- FIM DO CÓDIGO DE SIMULAÇÃO ---
 
-
-    if (success) { // 'success' virá da chamada da API real ou da simulação
-      console.log(`Promoção ${initialPromotion?.productName} excluída com sucesso!`);
+    if (success) {
       Alert.alert('Excluído', 'Promoção excluída com sucesso!');
-      // NAVEGA DE VOLTA E, O IDEAL, ATUALIZA A TELA ANTERIOR (PromotionsScreen)
-      // PromotionsScreen precisará usar useFocusEffect para recarregar mockPromotionsData
       navigation.goBack();
     } else {
       console.log(`Falha ao excluir promoção ${initialPromotion?.productName}.`);
-      Alert.alert('Erro', 'Não foi possível excluir a promoção.');
+      // Alert.alert já é chamado no bloco try/catch do código real
     }
   };
 
-  // FUNÇÃO PARA CANCELAR A EXCLUSÃO (chamada pelo modal)
   const cancelDelete = () => {
     setDeleteModalVisible(false);
     console.log('Exclusão de promoção cancelada.');
@@ -160,7 +216,6 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
       </TouchableOpacity>
       <Text style={styles.header}>{isEditing ? 'Editar Promoção' : 'Adicionar Promoção'}</Text>
 
-      {/* Placeholder da Imagem */}
       <TouchableOpacity style={styles.imagePicker}>
         <Ionicons name="camera" size={40} color="#888" />
       </TouchableOpacity>
@@ -170,8 +225,8 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
         style={styles.input}
         value={productName}
         onChangeText={setProductName}
-        placeholder="Banana"
-        editable={!isEditing} // Não editável se estiver editando (assumindo que o produto é fixo)
+        placeholder="Produto"
+        editable={!isEditing}
       />
 
       <Text style={styles.label}>Tipo:</Text>
@@ -179,8 +234,8 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
         style={styles.input}
         value={productType}
         onChangeText={setProductType}
-        placeholder="Fruta"
-        editable={!isEditing} // Não editável se estiver editando
+        placeholder="Tipo"
+        editable={!isEditing}
       />
 
       <Text style={styles.label}>Promoção:</Text>
@@ -190,7 +245,7 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
           value={promotionPrice}
           onChangeText={setPromotionPrice}
           keyboardType="numeric"
-          placeholder="1,99"
+          placeholder="R$ 0,00"
         />
         <TouchableOpacity
           style={[styles.unitButton, unit === 'Kg' && styles.unitButtonActive]}
@@ -210,7 +265,7 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
         <Text style={styles.saveButtonText}>Salvar Alterações</Text>
       </TouchableOpacity>
 
-      {isEditing && ( // Botão de excluir só aparece se estiver editando
+      {isEditing && (
         <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
           <Text style={styles.deleteButtonText}>Excluir Promoção</Text>
         </TouchableOpacity>
@@ -227,6 +282,13 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
         onCancel={cancelDelete}
         confirmButtonColor="#FF6347"
         confirmButtonTextColor="white"
+      />
+
+      {/* RENDERIZAR O SuccessModal PARA SUCESSO AO SALVAR */}
+      <SuccessModal
+        isVisible={isSuccessModalVisible}
+        onAdvance={handleAdvanceFromSuccessModal}
+        message={successMessage}
       />
     </View>
   );
@@ -285,7 +347,7 @@ const styles = StyleSheet.create({
   },
   unitButton: {
     borderWidth: 1,
-    borderColor: '#007AFF', // Cor azul para os botões de unidade
+    borderColor: '#007AFF',
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -293,7 +355,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   unitButtonActive: {
-    backgroundColor: '#007AFF', // Cor azul quando ativo
+    backgroundColor: '#007AFF',
   },
   unitButtonText: {
     color: '#007AFF',

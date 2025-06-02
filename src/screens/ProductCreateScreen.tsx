@@ -5,6 +5,23 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { ProductStackParamList } from '../navigation/ProductStack';
 
 import SuccessModal from '../components/SuccessModal';
+import { Product } from '../types/product'; // Importar o tipo Product
+
+// Importar a lista mockada de produtos para simular a adição
+import { mockProductsData as globalMockProductsData } from './ProductEditScreen'; // <--- NOVO: Importar a lista global
+
+// Função simulada para adicionar um produto (simula uma chamada de API)
+const simulateAddProductApi = async (newProduct: Product): Promise<boolean> => {
+  return new Promise((resolve) => {
+    setTimeout(() => { // Simula um atraso de rede
+      globalMockProductsData.push(newProduct); // Adiciona o novo produto à lista global
+      console.log('Produto adicionado à lista mockada:', newProduct);
+      resolve(true); // Sucesso
+    }, 500); // 0.5 segundos de atraso
+  });
+};
+// --- FIM DOS DADOS MOCKADOS ---
+
 
 type ProductCreateScreenProps = StackScreenProps<ProductStackParamList, 'CreateProduct'>;
 
@@ -17,18 +34,78 @@ export default function ProductCreateScreen({ navigation }: ProductCreateScreenP
   const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleAddProduct = () => {
+  const handleAddProduct = async () => { // <--- AGORA É ASYNC
     setErrorMessage('');
 
-    // --- REMOVIDO/COMENTADO: Lógica de validação de campos vazios ---
-    // if (name.trim() === '' || type.trim() === '' || price.trim() === '') {
-    //   setErrorMessage('Por favor, preencha todos os campos obrigatórios.');
-    //   return;
-    // }
+    if (name.trim() === '' || type.trim() === '' || price.trim() === '') {
+      setErrorMessage('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
 
-    console.log('handleAddProduct: Tentando mostrar modal de sucesso (validação ignorada).');
-    setSuccessModalVisible(true);
-    console.log('handleAddProduct: isSuccessModalVisible definido para true.');
+    const priceValue = parseFloat(price.replace(',', '.'));
+    if (isNaN(priceValue)) {
+      setErrorMessage('Preço inválido.');
+      return;
+    }
+
+    const newProduct: Product = {
+      id: Date.now().toString(), // Gera um ID único simples
+      name,
+      type,
+      price: priceValue,
+      unit,
+    };
+
+    let success = false; // Variável para controlar o resultado da inclusão
+
+    // --- CÓDIGO REAL (COM BACKEND) - COMENTADO ---
+    /*
+    try {
+      console.log('Tentando adicionar produto ao backend:', newProduct);
+      const response = await fetch('https://sua-api.com/produtos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // 'Authorization': `Bearer ${seuTokenDeAutenticacao}`, // Se precisar de autenticação
+        },
+        body: JSON.stringify(newProduct),
+      });
+
+      if (response.ok) { // Verifica se a resposta foi 2xx (sucesso)
+        const responseData = await response.json(); // Se a API retornar o produto criado com ID
+        console.log('Produto adicionado com sucesso ao backend:', responseData);
+        success = true; // Define success como true se a API retornar sucesso
+      } else {
+        const errorData = await response.json(); // Tenta ler a mensagem de erro da API
+        console.error('Erro ao adicionar produto no backend:', response.status, errorData);
+        setErrorMessage(`Erro ao adicionar: ${errorData.message || 'Tente novamente.'}`);
+        success = false; // Define success como false em caso de erro da API
+      }
+    } catch (error) {
+      console.error('Erro de rede ou na requisição de inclusão:', error);
+      setErrorMessage('Erro de conexão. Tente novamente.');
+      success = false; // Define success como false em caso de erro de rede
+    }
+    */
+    // --- FIM DO CÓDIGO REAL (COM BACKEND) - COMENTADO ---
+
+    // --- CÓDIGO DE SIMULAÇÃO (ATIVO) ---
+    // Este bloco só é executado se o bloco de código real acima estiver comentado.
+    if (!success) { // Se o código real não foi executado ou falhou
+      success = await simulateAddProductApi(newProduct);
+    }
+    // --- FIM DO CÓDIGO DE SIMULAÇÃO ---
+
+
+    if (success) { // 'success' virá da chamada da API real ou da simulação
+      console.log('handleAddProduct: Produto adicionado com sucesso!');
+      setSuccessModalVisible(true); // Exibe o modal de sucesso
+    } else {
+      // Se a simulação falhar (o que não deve acontecer neste caso), ou se o código real falhar
+      console.log('handleAddProduct: Falha ao adicionar produto.');
+      // A mensagem de erro já foi definida no bloco try/catch do código real
+      // Ou você pode adicionar um Alert.alert('Erro', 'Não foi possível adicionar o produto.'); aqui
+    }
   };
 
   const handleCancel = () => {
@@ -36,9 +113,8 @@ export default function ProductCreateScreen({ navigation }: ProductCreateScreenP
   };
 
   const handleAdvanceFromSuccessModal = () => {
-    console.log('handleAdvanceFromSuccessModal: Botão Avançar clicado. Escondendo modal.');
     setSuccessModalVisible(false);
-    navigation.navigate('ProductList');
+    navigation.navigate('ProductList'); // Navega para a lista de produtos após o sucesso
   };
 
   return (
@@ -54,7 +130,7 @@ export default function ProductCreateScreen({ navigation }: ProductCreateScreenP
         style={styles.input}
         value={name}
         onChangeText={(text) => { setName(text); setErrorMessage(''); }}
-        placeholder="Banana"
+        placeholder="Produto"
       />
 
       <Text style={styles.label}>Tipo:</Text>
@@ -62,7 +138,7 @@ export default function ProductCreateScreen({ navigation }: ProductCreateScreenP
         style={styles.input}
         value={type}
         onChangeText={(text) => { setType(text); setErrorMessage(''); }}
-        placeholder="Fruta"
+        placeholder="Tipo"
       />
 
       <Text style={styles.label}>Preço:</Text>
@@ -72,7 +148,7 @@ export default function ProductCreateScreen({ navigation }: ProductCreateScreenP
           value={price}
           onChangeText={(text) => { setPrice(text); setErrorMessage(''); }}
           keyboardType="numeric"
-          placeholder="5,90"
+          placeholder="R$ 0,00"
         />
         <TouchableOpacity
           style={[styles.unitButton, unit === 'Kg' && styles.unitButtonActive]}
