@@ -8,20 +8,18 @@ import { ProductStackParamList } from '../navigation/ProductStack';
 import ConfirmationModal from '../components/ConfirmationModal';
 import SuccessModal from '../components/SuccessModal';
 
-import { Product } from '../types/product';
+import { Product } from '../types/product'; // Certifique-se de que o tipo Product está importado
 
-// --- NOVO: Definição do tipo das props para esta tela ---
+// Definição do tipo das props para esta tela
 type ProductEditScreenProps = StackScreenProps<ProductStackParamList, 'EditProduct'>;
-// --- FIM DO NOVO ---
 
-// --- DADOS MOCKADOS (SIMULANDO UM BANCO DE DADOS/API) ---
-// Em um aplicativo real, esta lista viria de um estado global ou de uma API.
-// Para este exemplo, vamos simular a remoção e atualização daqui.
-export let mockProductsData: Product[] = [ // <--- 'export' é necessário para ProductListScreen
-  { id: '1', name: 'Banana', type: 'Fruta', price: 5.9, unit: 'Kg' },
-  { id: '2', name: 'Maçã', type: 'Fruta', price: 6.5, unit: 'Kg' },
-  { id: '3', name: 'Alface', type: 'Verdura', price: 3.2, unit: 'Unid.' },
-  { id: '4', name: 'Tomate', type: 'Fruta', price: 4.8, unit: 'Kg' },
+// --- DADOS MOCKADOS (AGORA COM IMAGENS LOCAIS) ---
+// Certifique-se de que as imagens estão na pasta src/assets/images/
+export let mockProductsData: Product[] = [ // 'export' é necessário para ProductListScreen
+  { id: '1', name: 'Banana', type: 'Fruta', price: 5.9, unit: 'Kg', imageUrl: require('../assets/images/banana.png') },
+  { id: '2', name: 'Maçã', type: 'Fruta', price: 6.5, unit: 'Kg', imageUrl: require('../assets/images/maca.png') },
+  { id: '3', name: 'Alface', type: 'Verdura', price: 3.2, unit: 'Unid.', imageUrl: require('../assets/images/alface.png') },
+  { id: '4', name: 'Tomate', type: 'Fruta', price: 4.8, unit: 'Kg', imageUrl: require('../assets/images/tomate.png') },
 ];
 
 // Função simulada para remover um produto (simula uma chamada de API)
@@ -41,7 +39,7 @@ const simulateDeleteProductApi = async (productId: string): Promise<boolean> => 
   });
 };
 
-// --- NOVA FUNÇÃO SIMULADA PARA SALVAR/ATUALIZAR UM PRODUTO ---
+// Função simulada para salvar/atualizar um produto
 const simulateSaveProductApi = async (updatedProduct: Product): Promise<boolean> => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -51,10 +49,8 @@ const simulateSaveProductApi = async (updatedProduct: Product): Promise<boolean>
         console.log('simulateSaveProductApi: Produto atualizado na lista mockada:', updatedProduct);
         resolve(true);
       } else {
-        // Isso não deve acontecer para uma atualização de um produto existente,
-        // mas seria o caso de adicionar um novo.
-        console.log('simulateSaveProductApi: Produto não encontrado para atualização, adicionando como novo:', updatedProduct);
-        mockProductsData.push(updatedProduct);
+        console.log('simulateSaveProductApi: Produto não encontrado para atualização, adicionando como novo (não deveria ocorrer na edição):', updatedProduct);
+        mockProductsData.push(updatedProduct); // Isso não deve acontecer para uma atualização de um produto existente
         resolve(true);
       }
     }, 500);
@@ -76,7 +72,7 @@ export default function ProductEditScreen({ route, navigation }: ProductEditScre
   const [successMessage, setSuccessMessage] = useState('');
 
 
-  const handleSave = async () => { // <--- AGORA É ASYNC
+  const handleSave = async () => {
     // Validação básica
     if (name.trim() === '' || type.trim() === '' || price.trim() === '') {
       Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');

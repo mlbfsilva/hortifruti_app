@@ -1,6 +1,6 @@
 // src/screens/PromotionsScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native'; // <--- IMPORTAR Image
 import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
 import { useFocusEffect } from '@react-navigation/native';
@@ -10,35 +10,28 @@ import { ProfileStackParamList } from '../navigation/ProfileStack';
 import { Promotion } from '../types/profile';
 
 // --- DADOS MOCKADOS (SIMULANDO UM BANCO DE DADOS/API) ---
-// Em um aplicativo real, esta lista viria de um estado global ou de uma API.
-// Para este exemplo, vamos simular a remoção daqui.
-export let mockPromotionsData: Promotion[] = [ // <--- ADICIONAR 'export' AQUI
-  { id: 'promo1', productId: '1', productName: 'Banana', productType: 'Fruta', promotionPrice: 1.99, unit: 'Kg' },
-  { id: 'promo2', productId: '2', productName: 'Maçã', productType: 'Fruta', promotionPrice: 1.50, unit: 'Kg' },
-  { id: 'promo3', productId: '3', productName: 'Alface', productType: 'Verdura', promotionPrice: 0.99, unit: 'Unid.' },
+// Adicionando imagens fictícias para as promoções.
+// Certifique-se de que estas imagens existem em src/assets/images/
+export let mockPromotionsData: Promotion[] = [
+  { id: 'promo1', productId: '1', productName: 'Banana', productType: 'Fruta', promotionPrice: 1.99, unit: 'Kg', imageUrl: require('../assets/images/banana.png') }, // <--- COM IMAGEM
+  { id: 'promo2', productId: '2', productName: 'Maçã', productType: 'Fruta', promotionPrice: 1.50, unit: 'Kg', imageUrl: require('../assets/images/maca.png') },     // <--- COM IMAGEM
+  { id: 'promo3', productId: '3', productName: 'Alface', productType: 'Verdura', promotionPrice: 0.99, unit: 'Unid.', imageUrl: require('../assets/images/alface.png') }, // <--- COM IMAGEM
 ];
 // --- FIM DOS DADOS MOCKADOS ---
 
-// Definir o tipo das props para esta tela
 type PromotionsScreenProps = StackScreenProps<ProfileStackParamList, 'Promotions'>;
 
 export default function PromotionsScreen({ navigation }: PromotionsScreenProps) {
-  const [promotions, setPromotions] = useState<Promotion[]>([]); // <--- NOVO: Estado para a lista de promoções
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
 
-  // Use useFocusEffect para recarregar os dados sempre que a tela for focada
   useFocusEffect(
     useCallback(() => {
-      // Quando a tela é focada, atualize a lista de promoções com os dados globais mockados
-      setPromotions(mockPromotionsData); // <--- ATUALIZA O ESTADO COM OS DADOS GLOBAIS
-      return () => {
-        // Opcional: Lógica de limpeza quando a tela perde o foco
-      };
+      setPromotions([...mockPromotionsData]);
+      return () => {};
     }, [])
   );
 
-  const handleAddPromotion = () => { // Função para adicionar nova promoção
-    // Navega para a tela EditPromotion sem passar um objeto 'promotion',
-    // indicando que é uma nova promoção a ser criada.
+  const handleAddPromotion = () => {
     navigation.navigate('EditPromotion', {});
   };
 
@@ -52,12 +45,15 @@ export default function PromotionsScreen({ navigation }: PromotionsScreenProps) 
       <Text style={styles.subHeader}>Adicione as promoções sobre seus produtos:</Text>
 
       <FlatList
-        data={promotions} // <--- USAR O ESTADO 'promotions'
+        data={promotions}
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingBottom: 16 }}
         renderItem={({ item }) => (
           <View style={styles.promotionCard}>
-            <View style={styles.imagePlaceholder} />
+            {/* NOVO: EXIBIR IMAGEM */}
+            {item.imageUrl && ( // Verifica se a imagem existe
+              <Image source={item.imageUrl} style={styles.promotionImage} />
+            )}
             <View style={styles.promotionInfo}>
               <Text style={styles.promotionText}>Produto: {item.productName}</Text>
               <Text style={styles.promotionText}>Promoção: R$ {item.promotionPrice.toFixed(2)} {item.unit}</Text>
@@ -74,9 +70,9 @@ export default function PromotionsScreen({ navigation }: PromotionsScreenProps) 
 
       <TouchableOpacity
         style={styles.addButton}
-        onPress={handleAddPromotion} // <--- ATUALIZADO: Chama a nova função
+        onPress={handleAddPromotion}
       >
-        <Text style={styles.addButtonText}>Adicionar Produto</Text>
+        <Text style={styles.addButtonText}>Adicionar Promoção</Text>
       </TouchableOpacity>
     </View>
   );
@@ -119,11 +115,11 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
-  imagePlaceholder: {
-    backgroundColor: '#e0e0e0',
-    borderRadius: 8,
-    width: 60,
+  // NOVO: Estilo para a imagem da promoção
+  promotionImage: {
+    width: 60, // Ajuste o tamanho conforme o design
     height: 60,
+    borderRadius: 8, // Borda arredondada para a imagem
     marginRight: 16,
   },
   promotionInfo: {
