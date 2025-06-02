@@ -29,3 +29,12 @@ export type StoreProfile = {
     // Adicione outras formas de pagamento conforme necessário
   };
   
+  // NOVO: Tipo para uma promoção
+export type Promotion = {
+  id: string;
+  productId: string; // ID do produto ao qual a promoção se aplica
+  productName: string; // Nome do produto para exibição
+  productType: string; // Tipo do produto (ex: Fruta, Verdura)
+  promotionPrice: number; // Preço promocional
+  unit: 'Kg' | 'Unid.'; // Unidade da promoção
+};
