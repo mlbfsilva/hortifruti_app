@@ -175,10 +175,10 @@ export default function ProductEditScreen({ route, navigation }: ProductEditScre
     // --- FIM DO CÓDIGO DE SIMULAÇÃO ---
 
     if (success) {
-      Alert.alert('Excluído', 'Produto excluído com sucesso!'); 
+      Alert.alert('Excluído', 'Produto excluído com sucesso!'); // ESTE ALERT AINDA PODE CAUSAR PROBLEMA NO CANVAS
       navigation.goBack();
     } else {
-      Alert.alert('Erro', 'Não foi possível excluir o produto.'); 
+      Alert.alert('Erro', 'Não foi possível excluir o produto.'); // ESTE ALERT AINDA PODE CAUSAR PROBLEMA NO CANVAS
     }
   };
 
