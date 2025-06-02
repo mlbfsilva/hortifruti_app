@@ -1,6 +1,6 @@
 // src/screens/EditPromotionScreen.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from 'react-native'; // <--- IMPORTAR Image
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
 
@@ -36,14 +36,14 @@ const simulateSavePromotionApi = async (promotion: Promotion, isNew: boolean): P
     setTimeout(() => {
       if (isNew) {
         mockPromotionsData.push(promotion);
-        console.log('Nova promoção adicionada à lista mockada:', promotion);
+        console.log('simulateSavePromotionApi: Nova promoção adicionada à lista mockada:', promotion); // <--- CONSOLE.LOG
       } else {
         const index = mockPromotionsData.findIndex(p => p.id === promotion.id);
         if (index > -1) {
           mockPromotionsData[index] = promotion;
-          console.log('Promoção atualizada na lista mockada:', promotion);
+          console.log('simulateSavePromotionApi: Promoção atualizada na lista mockada:', promotion); // <--- CONSOLE.LOG
         } else {
-          console.log('Promoção não encontrada para atualização, adicionando como nova:', promotion);
+          console.log('simulateSavePromotionApi: Promoção não encontrada para atualização, adicionando como nova (não deveria ocorrer na edição):', promotion);
           mockPromotionsData.push(promotion);
         }
       }
@@ -71,14 +71,17 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
 
 
   const handleSave = async () => {
+    console.log('handleSave: Botão Salvar Alterações clicado.'); // <--- CONSOLE.LOG
     if (productName.trim() === '' || productType.trim() === '' || promotionPrice.trim() === '') {
       Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
+      console.log('handleSave: Validação falhou - campos vazios.'); // <--- CONSOLE.LOG
       return;
     }
 
     const priceValue = parseFloat(promotionPrice.replace(',', '.'));
     if (isNaN(priceValue)) {
       Alert.alert('Erro', 'Preço da promoção inválido.');
+      console.log('handleSave: Validação falhou - preço inválido.'); // <--- CONSOLE.LOG
       return;
     }
 
@@ -89,8 +92,10 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
       productType,
       promotionPrice: priceValue,
       unit,
-      imageUrl: initialPromotion?.imageUrl, // <--- MANTER A URL DA IMAGEM
+      imageUrl: initialPromotion?.imageUrl,
     };
+    console.log('handleSave: Objeto de promoção a ser salvo:', newOrUpdatedPromotion); // <--- CONSOLE.LOG
+
 
     let success = false;
 
@@ -128,6 +133,7 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
     // --- CÓDIGO DE SIMULAÇÃO (ATIVO) ---
     if (!success) {
       success = await simulateSavePromotionApi(newOrUpdatedPromotion, !isEditing);
+      console.log('handleSave: Resultado da simulação de salvar:', success); // <--- CONSOLE.LOG
     }
     // --- FIM DO CÓDIGO DE SIMULAÇÃO ---
 
@@ -135,13 +141,15 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
     if (success) {
       setSuccessMessage(isEditing ? 'Promoção atualizada com Sucesso!' : 'Promoção Adicionada com Sucesso!');
       setSuccessModalVisible(true);
+      console.log('handleSave: Modal de sucesso ativado.'); // <--- CONSOLE.LOG
     } else {
-      console.log(`Falha ao ${isEditing ? 'salvar' : 'adicionar'} promoção.`);
+      console.log(`handleSave: Falha ao ${isEditing ? 'salvar' : 'adicionar'} promoção.`); // <--- CONSOLE.LOG
     }
   };
 
   const handleAdvanceFromSuccessModal = () => {
     setSuccessModalVisible(false);
+    console.log('handleAdvanceFromSuccessModal: Modal de sucesso fechado. Voltando...'); // <--- CONSOLE.LOG
     navigation.goBack();
   };
 
@@ -157,23 +165,19 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
     // --- CÓDIGO REAL (COM BACKEND) - COMENTADO ---
     /*
     try {
-      console.log(`Tentando excluir promoção ${initialPromotion?.id} do backend...`);
       const response = await fetch(`https://sua-api.com/promocoes/${initialPromotion?.id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       });
 
       if (response.ok) {
-        console.log(`Promoção ${initialPromotion?.productName} excluída com sucesso do backend.`);
         success = true;
       } else {
         const errorData = await response.json();
-        console.error('Erro ao excluir promoção no backend:', response.status, errorData);
         Alert.alert('Erro', `Não foi possível excluir a promoção: ${errorData.message || 'Tente novamente.'}`);
         success = false;
       }
     } catch (error) {
-      console.error('Erro de rede ou na requisição de exclusão:', error);
       Alert.alert('Erro', 'Erro de conexão. Tente novamente.');
       success = false;
     }
@@ -212,7 +216,7 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
       <Text style={styles.header}>{isEditing ? 'Editar Promoção' : 'Adicionar Promoção'}</Text>
 
       {/* EXIBIR IMAGEM DO PRODUTO DA PROMOÇÃO OU PLACEHOLDER DA CÂMERA */}
-      {initialPromotion?.imageUrl ? ( // Verifica se a imagem existe na promoção
+      {initialPromotion?.imageUrl ? (
         <Image source={initialPromotion.imageUrl} style={styles.promotionProductImage} />
       ) : (
         <TouchableOpacity style={styles.imagePicker}>
@@ -226,7 +230,7 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
         value={productName}
         onChangeText={setProductName}
         placeholder="Produto"
-        editable={!isEditing}
+        // REMOVIDO: editable={!isEditing}
       />
 
       <Text style={styles.label}>Tipo:</Text>
@@ -235,7 +239,7 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
         value={productType}
         onChangeText={setProductType}
         placeholder="Tipo"
-        editable={!isEditing}
+        // REMOVIDO: editable={!isEditing}
       />
 
       <Text style={styles.label}>Promoção:</Text>
@@ -321,7 +325,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 24,
   },
-  promotionProductImage: { // NOVO: Estilo para a imagem do produto da promoção
+  promotionProductImage: { // Estilo para a imagem do produto da promoção
     alignSelf: 'center',
     width: 80,
     height: 80,

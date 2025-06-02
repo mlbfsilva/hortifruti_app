@@ -1,6 +1,6 @@
 // src/screens/ProductEditScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from 'react-native'; // <--- IMPORTAR Image
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
 
@@ -10,6 +10,7 @@ import SuccessModal from '../components/SuccessModal';
 
 import { Product } from '../types/product';
 
+// Definição do tipo das props para esta tela
 type ProductEditScreenProps = StackScreenProps<ProductStackParamList, 'EditProduct'>;
 
 // --- DADOS MOCKADOS (SIMULANDO UM BANCO DE DADOS/API) ---
@@ -20,10 +21,38 @@ export let mockProductsData: Product[] = [
   { id: '4', name: 'Tomate', type: 'Fruta', price: 4.8, unit: 'Kg', imageUrl: require('../assets/images/tomate.png') },
 ];
 
-// Função simulada para remover um produto
-const simulateDeleteProductApi = async (productId: string): Promise<boolean> => { /* ... */ return true; };
-// Função simulada para salvar/atualizar um produto
-const simulateSaveProductApi = async (updatedProduct: Product): Promise<boolean> => { /* ... */ return true; };
+const simulateDeleteProductApi = async (productId: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const initialLength = mockProductsData.length;
+      mockProductsData = mockProductsData.filter(p => p.id !== productId);
+      if (mockProductsData.length < initialLength) {
+        console.log(`Produto ${productId} removido da lista mockada.`);
+        resolve(true);
+      } else {
+        console.log(`Produto ${productId} não encontrado na lista mockada.`);
+        resolve(false);
+      }
+    }, 500);
+  });
+};
+
+const simulateSaveProductApi = async (updatedProduct: Product): Promise<boolean> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const index = mockProductsData.findIndex(p => p.id === updatedProduct.id);
+      if (index > -1) {
+        mockProductsData [index] = updatedProduct;
+        console.log('simulateSaveProductApi: Produto atualizado na lista mockada:', updatedProduct);
+        resolve(true);
+      } else {
+        console.log('simulateSaveProductApi: Produto não encontrado para atualização, adicionando como novo (não deveria ocorrer na edição):', updatedProduct);
+        mockProductsData.push(updatedProduct);
+        resolve(true);
+      }
+    }, 500);
+  });
+};
 // --- FIM DOS DADOS MOCKADOS ---
 
 
@@ -38,37 +67,147 @@ export default function ProductEditScreen({ route, navigation }: ProductEditScre
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
   const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState(''); // Para exibir erros na tela
 
 
-  const handleSave = async () => { /* ... */ };
-  const handleAdvanceFromSuccessModal = () => { /* ... */ };
-  const handleDelete = () => { /* ... */ };
-  const confirmDelete = async () => { /* ... */ };
-  const cancelDelete = () => { /* ... */ };
+  const handleSave = async () => {
+    setErrorMessage(''); // Limpa mensagens de erro anteriores
+    // Validação básica
+    if (name.trim() === '' || type.trim() === '' || price.trim() === '') {
+      setErrorMessage('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+    const priceValue = parseFloat(price.replace(',', '.'));
+    if (isNaN(priceValue)) {
+      setErrorMessage('Preço inválido.');
+      return;
+    }
+
+    const updatedProduct: Product = {
+      ...initialProduct,
+      name,
+      type,
+      price: priceValue,
+      unit,
+    };
+
+    let success = false;
+
+    // --- CÓDIGO REAL (COM BACKEND) - COMENTADO ---
+    /*
+    try {
+      const response = await fetch(`https://sua-api.com/produtos/${updatedProduct.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedProduct),
+      });
+
+      if (response.ok) {
+        success = true;
+      } else {
+        const errorData = await response.json();
+        setErrorMessage(`Não foi possível salvar: ${errorData.message || 'Tente novamente.'}`);
+        success = false;
+      }
+    } catch (error) {
+      setErrorMessage('Erro de conexão. Tente novamente.');
+      success = false;
+    }
+    */
+    // --- FIM DO CÓDIGO REAL (COM BACKEND) - COMENTADO ---
+
+    // --- CÓDIGO DE SIMULAÇÃO (ATIVO) ---
+    if (!success) {
+      success = await simulateSaveProductApi(updatedProduct);
+    }
+    // --- FIM DO CÓDIGO DE SIMULAÇÃO ---
+
+
+    if (success) {
+      setSuccessMessage('Produto atualizado com sucesso!');
+      setSuccessModalVisible(true);
+    } else {
+      setErrorMessage('Falha ao salvar as alterações.');
+    }
+  };
+
+  const handleAdvanceFromSuccessModal = () => {
+    setSuccessModalVisible(false);
+    navigation.goBack();
+  };
+
+
+  const handleDelete = () => {
+    setDeleteModalVisible(true);
+  };
+
+  const confirmDelete = async () => {
+    setDeleteModalVisible(false);
+
+    let success = false;
+
+    // --- CÓDIGO REAL (COM BACKEND) - COMENTADO ---
+    /*
+    try {
+      const response = await fetch(`https://sua-api.com/produtos/${initialProduct.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (response.ok) {
+        success = true;
+      } else {
+        const errorData = await response.json();
+        Alert.alert('Erro', `Não foi possível excluir o produto: ${errorData.message || 'Tente novamente.'}`);
+        success = false;
+      }
+    } catch (error) {
+      Alert.alert('Erro', 'Erro de conexão. Tente novamente.');
+      success = false;
+    }
+    */
+    // --- FIM DO CÓDIGO REAL (COM BACKEND) - COMENTADO ---
+
+    // --- CÓDIGO DE SIMULAÇÃO (ATIVO) ---
+    if (!success) {
+      success = await simulateDeleteProductApi(initialProduct.id);
+    }
+    // --- FIM DO CÓDIGO DE SIMULAÇÃO ---
+
+    if (success) {
+      Alert.alert('Excluído', 'Produto excluído com sucesso!'); 
+      navigation.goBack();
+    } else {
+      Alert.alert('Erro', 'Não foi possível excluir o produto.'); 
+    }
+  };
+
+  const cancelDelete = () => {
+    setDeleteModalVisible(false);
+    console.log('Exclusão cancelada.');
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Editar Produto</Text>
-
-      {/*EXIBIR IMAGEM DO PRODUTO OU PLACEHOLDER DA CÂMERA */}
+      {/* NOVO: EXIBIR IMAGEM DO PRODUTO OU PLACEHOLDER DA CÂMERA */}
       {initialProduct.imageUrl ? (
-        <Image source={initialProduct.imageUrl} style={styles.productImage} />
+        <Image source={initialProduct.imageUrl} style={styles.productImage} resizeMode="contain" />
       ) : (
         <TouchableOpacity style={styles.imagePicker}>
           <Ionicons name="camera" size={40} color="#888" />
         </TouchableOpacity>
       )}
-
       <Text style={styles.label}>Produto:</Text>
-      <TextInput style={styles.input} value={name} onChangeText={setName} />
+      <TextInput style={styles.input} value={name} onChangeText={(text) => { setName(text); setErrorMessage(''); }} /> {/* Limpar erro ao digitar */}
       <Text style={styles.label}>Tipo:</Text>
-      <TextInput style={styles.input} value={type} onChangeText={setType} />
+      <TextInput style={styles.input} value={type} onChangeText={(text) => { setType(text); setErrorMessage(''); }} /> {/* Limpar erro ao digitar */}
       <Text style={styles.label}>Preço:</Text>
       <View style={styles.priceRow}>
         <TextInput
           style={[styles.input, { flex: 1, marginRight: 8 }]}
           value={price}
-          onChangeText={setPrice}
+          onChangeText={(text) => { setPrice(text); setErrorMessage(''); }} /* Limpar erro ao digitar */
           keyboardType="numeric"
         />
         <TouchableOpacity
@@ -84,6 +223,10 @@ export default function ProductEditScreen({ route, navigation }: ProductEditScre
           <Text style={[styles.unitButtonText, unit === 'Unid.' && styles.unitButtonTextActive]}>Unid.</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Exibir mensagem de erro de validação */}
+      {errorMessage ? <Text style={styles.errorMessage}>{errorMessage}</Text> : null}
+
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>Salvar Alterações</Text>
       </TouchableOpacity>
@@ -103,6 +246,7 @@ export default function ProductEditScreen({ route, navigation }: ProductEditScre
         confirmButtonTextColor="white"
       />
 
+      {/* RENDERIZAR O SuccessModal PARA SUCESSO AO SALVAR */}
       <SuccessModal
         isVisible={isSuccessModalVisible}
         onAdvance={handleAdvanceFromSuccessModal}
@@ -125,7 +269,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 16,
   },
-  imagePicker: { // Estilo para o placeholder da câmera
+  imagePicker: {
     alignSelf: 'center',
     backgroundColor: '#f2f2f2',
     borderRadius: 16,
@@ -135,13 +279,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 24,
   },
-  productImage: { // Estilo para a imagem do produto
-    alignSelf: 'center',
-    width: 80,
-    height: 80,
-    borderRadius: 16,
+  productImage: { // <--- ESTILOS PARA A IMAGEM DO PRODUTO
+    width: 150,       // Defina uma largura máxima
+    height: 150,      // Defina uma altura máxima
+    borderRadius: 8,
     marginBottom: 24,
-    resizeMode: 'cover', // Garante que a imagem preencha o espaço
+    alignSelf: 'center', // Centralizar a imagem
   },
   label: {
     fontWeight: '500',
@@ -204,5 +347,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     fontSize: 16,
+  },
+  errorMessage: { // Estilo para mensagem de erro na tela
+    color: 'red',
+    fontSize: 14,
+    marginBottom: 10,
+    textAlign: 'center',
   },
 });
