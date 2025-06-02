@@ -4,13 +4,33 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'reac
 import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
 
-// Importar a lista de parâmetros do ProfileStack
-import { ProfileStackParamList } from '../navigation/ProfileStack'; // Ajuste o caminho se necessário
+import { ProfileStackParamList } from '../navigation/ProfileStack';
+import { StoreAddress } from '../types/profile'; // Importar o tipo StoreAddress
 
-// IMPORTAR O TIPO 'StoreAddress' DIRETAMENTE DE 'src/types/profile.ts'
-import { StoreAddress } from '../types/profile'; // <--- CORREÇÃO AQUI
+// Importar o SuccessModal
+import SuccessModal from '../components/SuccessModal';
 
-// Definir o tipo das props para esta tela
+// Importar a lista mockada de endereço da loja para simular a atualização
+import { mockStoreAddress as globalMockStoreAddress } from './StoreProfileScreen'; // <--- NOVO
+
+// Função simulada para salvar/atualizar o endereço da loja
+const simulateSaveStoreAddressApi = async (updatedAddress: StoreAddress): Promise<boolean> => {
+  return new Promise((resolve) => {
+    setTimeout(() => { // Simula um atraso de rede
+      globalMockStoreAddress.cep = updatedAddress.cep;
+      globalMockStoreAddress.state = updatedAddress.state;
+      globalMockStoreAddress.city = updatedAddress.city;
+      globalMockStoreAddress.street = updatedAddress.street;
+      globalMockStoreAddress.number = updatedAddress.number;
+      globalMockStoreAddress.complement = updatedAddress.complement;
+      console.log('Endereço da loja atualizado na lista mockada:', globalMockStoreAddress);
+      resolve(true); // Sucesso
+    }, 500);
+  });
+};
+// --- FIM DOS DADOS MOCKADOS ---
+
+
 type EditAddressScreenProps = StackScreenProps<ProfileStackParamList, 'EditAddress'>;
 
 export default function EditAddressScreen({ route, navigation }: EditAddressScreenProps) {
@@ -24,10 +44,20 @@ export default function EditAddressScreen({ route, navigation }: EditAddressScre
   const [number, setNumber] = useState(initialAddress.number);
   const [complement, setComplement] = useState(initialAddress.complement || '');
 
-  const handleSave = () => {
-    // Aqui você implementaria a lógica para salvar o endereço atualizado
+  // ESTADOS PARA CONTROLAR A VISIBILIDADE DO MODAL DE SUCESSO
+  const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+
+
+  const handleSave = async () => { // <--- AGORA É ASYNC
+    // Validação básica
+    if (cep.trim() === '' || state.trim() === '' || city.trim() === '' || street.trim() === '' || number.trim() === '') {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+
     const updatedAddress: StoreAddress = {
-      ...initialAddress,
+      ...initialAddress, // Mantém o ID original (se houvesse um)
       cep,
       state,
       city,
@@ -35,10 +65,57 @@ export default function EditAddressScreen({ route, navigation }: EditAddressScre
       number,
       complement,
     };
-    console.log('Endereço atualizado:', updatedAddress);
-    Alert.alert('Sucesso', 'Endereço atualizado com sucesso!');
-    navigation.goBack();
+
+    let success = false;
+
+    // --- CÓDIGO REAL (COM BACKEND) - COMENTADO ---
+    /*
+    try {
+      console.log('Tentando salvar endereço da loja no backend:', updatedAddress);
+      const response = await fetch('https://sua-api.com/perfil/endereco', {
+        method: 'PUT', // Geralmente PUT para atualização
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedAddress),
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log('Endereço da loja salvo com sucesso no backend:', responseData);
+        success = true;
+      } else {
+        const errorData = await response.json();
+        console.error('Erro ao salvar endereço da loja no backend:', response.status, errorData);
+        Alert.alert('Erro', `Não foi possível salvar o endereço: ${errorData.message || 'Tente novamente.'}`);
+        success = false;
+      }
+    } catch (error) {
+      console.error('Erro de rede ou na requisição de salvar endereço:', error);
+      Alert.alert('Erro', 'Erro de conexão. Tente novamente.');
+      success = false;
+    }
+    */
+    // --- FIM DO CÓDIGO REAL (COM BACKEND) - COMENTADO ---
+
+    // --- CÓDIGO DE SIMULAÇÃO (ATIVO) ---
+    if (!success) {
+      success = await simulateSaveStoreAddressApi(updatedAddress);
+    }
+    // --- FIM DO CÓDIGO DE SIMULAÇÃO ---
+
+
+    if (success) {
+      setSuccessMessage('Endereço atualizado com sucesso!');
+      setSuccessModalVisible(true);
+    } else {
+      console.log('Falha ao salvar endereço da loja.');
+    }
   };
+
+  const handleAdvanceFromSuccessModal = () => {
+    setSuccessModalVisible(false);
+    navigation.goBack(); // Volta para a tela de perfil
+  };
+
 
   return (
     <View style={styles.container}>
@@ -73,6 +150,13 @@ export default function EditAddressScreen({ route, navigation }: EditAddressScre
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>Salvar Alterações</Text>
       </TouchableOpacity>
+
+      {/* RENDERIZAR O SuccessModal PARA SUCESSO AO SALVAR */}
+      <SuccessModal
+        isVisible={isSuccessModalVisible}
+        onAdvance={handleAdvanceFromSuccessModal}
+        message={successMessage}
+      />
     </View>
   );
 }

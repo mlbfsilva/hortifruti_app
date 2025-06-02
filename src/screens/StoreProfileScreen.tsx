@@ -11,8 +11,9 @@ import { StoreProfile, StoreAddress, PaymentMethods } from '../types/profile';
 
 import ExitConfirmationModal from '../components/ExitConfirmationModal';
 
-// Dados mockados para simular o perfil da loja (você substituirá isso por dados reais)
-const mockStoreProfile: StoreProfile = {
+// --- DADOS MOCKADOS (SIMULANDO UM BANCO DE DADOS/API) ---
+// AGORA EXPORTAMOS E USAMOS 'let' para que possam ser modificados e importados
+export let mockStoreProfile: StoreProfile = {
   id: 'store-123',
   name: 'Hortifruti Gostinho Bom',
   email: 'hortifrutigostinhobom.com.br',
@@ -24,7 +25,7 @@ const mockStoreProfile: StoreProfile = {
   },
 };
 
-const mockStoreAddress: StoreAddress = {
+export let mockStoreAddress: StoreAddress = {
   cep: '99999-999',
   state: 'Distrito Federal',
   city: 'Taguatinga',
@@ -33,7 +34,6 @@ const mockStoreAddress: StoreAddress = {
   complement: 'Loja',
 };
 
-// EXPORTAR mockPaymentMethods para que EditPaymentMethodsScreen possa manipulá-lo
 export let mockPaymentMethods: PaymentMethods = {
   pix: true,
   creditCard: true,
@@ -54,10 +54,10 @@ export default function StoreProfileScreen({ navigation }: StoreProfileScreenPro
   // Use useFocusEffect para recarregar os dados sempre que a tela for focada
   useFocusEffect(
     useCallback(() => {
-      // Atualize os estados locais com os dados globais mockados
-      setProfileData(mockStoreProfile);
-      setAddressData(mockStoreAddress);
-      setPaymentMethodsData(mockPaymentMethods);
+      // Crie uma NOVA instância de objeto a partir dos dados globais mutáveis
+      setProfileData({ ...mockStoreProfile }); // <--- CHAVE DA CORREÇÃO: Usar spread para criar nova referência
+      setAddressData({ ...mockStoreAddress }); // <--- CHAVE DA CORREÇÃO: Usar spread para criar nova referência
+      setPaymentMethodsData({ ...mockPaymentMethods }); // Já estava correto, mas mantendo o padrão
       return () => {
         // Opcional: Lógica de limpeza quando a tela perde o foco
       };
