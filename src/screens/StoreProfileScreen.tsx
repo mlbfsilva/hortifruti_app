@@ -1,6 +1,6 @@
 // src/screens/StoreProfileScreen.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native'; // <--- IMPORTAR Image
 import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
 import { useFocusEffect } from '@react-navigation/native';
@@ -11,13 +11,16 @@ import { StoreProfile, StoreAddress, PaymentMethods } from '../types/profile';
 
 import ExitConfirmationModal from '../components/ExitConfirmationModal';
 
+// --- IMPORTAR A IMAGEM DA LOGO ---
+const logoImage = require('../assets/images/logo_gostinho_bom.png'); // <--- NOVO
+
 // --- DADOS MOCKADOS (SIMULANDO UM BANCO DE DADOS/API) ---
 export let mockStoreProfile: StoreProfile = {
   id: 'store-123',
   name: 'Hortifruti Gostinho Bom',
   email: 'hortifrutigostinhobom.com.br',
   phone: '(XX) XXXX-XXXX',
-  status: 'Aberto', // O status inicial pode ser definido aqui, mas será atualizado
+  status: 'Aberto',
   openingHours: {
     from: '09:00',
     to: '17:00',
@@ -44,45 +47,27 @@ export let mockPaymentMethods: PaymentMethods = {
 type StoreProfileScreenProps = StackScreenProps<ProfileStackParamList, 'StoreProfile'>;
 
 const getStoreStatus = (openingHours: { from: string; to: string }): 'Aberto' | 'Fechado' | 'Em Férias' => {
-  console.log('getStoreStatus: Horário de funcionamento recebido:', openingHours);
-
   const now = new Date();
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
 
-  console.log(`getStoreStatus: Horário atual do dispositivo: ${currentHour}:${currentMinute}`);
-
   const [openHour, openMinute] = openingHours.from.split(':').map(Number);
   const [closeHour, closeMinute] = openingHours.to.split(':').map(Number);
-
-  console.log(`getStoreStatus: Horário de abertura parseado: ${openHour}:${openMinute}`);
-  console.log(`getStoreStatus: Horário de fechamento parseado: ${closeHour}:${closeMinute}`);
-
 
   const currentTimeInMinutes = currentHour * 60 + currentMinute;
   const openTimeInMinutes = openHour * 60 + openMinute;
   const closeTimeInMinutes = closeHour * 60 + closeMinute;
 
-  console.log(`getStoreStatus: Tempo atual em minutos: ${currentTimeInMinutes}`);
-  console.log(`getStoreStatus: Tempo de abertura em minutos: ${openTimeInMinutes}`);
-  console.log(`getStoreStatus: Tempo de fechamento em minutos: ${closeTimeInMinutes}`);
-
-
-  // Ajuste para lidar com horários de fechamento no dia seguinte (ex: abre 22h, fecha 04h)
   if (openTimeInMinutes > closeTimeInMinutes) {
     if (currentTimeInMinutes >= openTimeInMinutes || currentTimeInMinutes <= closeTimeInMinutes) {
-      console.log('getStoreStatus: Retornando: Aberto (passa meia-noite)');
       return 'Aberto';
     } else {
-      console.log('getStoreStatus: Retornando: Fechado (passa meia-noite)');
       return 'Fechado';
     }
   } else {
     if (currentTimeInMinutes >= openTimeInMinutes && currentTimeInMinutes <= closeTimeInMinutes) {
-      console.log('getStoreStatus: Retornando: Aberto');
       return 'Aberto';
     } else {
-      console.log('getStoreStatus: Retornando: Fechado');
       return 'Fechado';
     }
   }
@@ -96,22 +81,18 @@ export default function StoreProfileScreen({ navigation }: StoreProfileScreenPro
 
   useFocusEffect(
     useCallback(() => {
-      console.log('StoreProfileScreen: useFocusEffect acionado.'); // <--- CONSOLE.LOG
-      console.log('StoreProfileScreen: mockStoreProfile.openingHours no foco:', mockStoreProfile.openingHours); // <--- CONSOLE.LOG
-
       const currentCalculatedStatus = getStoreStatus(mockStoreProfile.openingHours);
       setProfileData({ ...mockStoreProfile, status: currentCalculatedStatus });
       setAddressData({ ...mockStoreAddress });
       setPaymentMethodsData({ ...mockPaymentMethods });
 
       const intervalId = setInterval(() => {
-        console.log('StoreProfileScreen: setInterval - mockStoreProfile.openingHours:', mockStoreProfile.openingHours); // <--- CONSOLE.LOG
         const updatedStatus = getStoreStatus(mockStoreProfile.openingHours);
         if (updatedStatus !== mockStoreProfile.status) {
           mockStoreProfile.status = updatedStatus;
           setProfileData({ ...mockStoreProfile });
         }
-      }, 60 * 1000); // A cada 1 minuto
+      }, 60 * 1000);
 
       return () => {
         clearInterval(intervalId);
@@ -141,9 +122,9 @@ export default function StoreProfileScreen({ navigation }: StoreProfileScreenPro
       <Text style={styles.header}>Perfil da Loja</Text>
 
       <View style={styles.profileHeader}>
-        <View style={styles.imagePlaceholder}>
-          <Ionicons name="camera" size={40} color="#888" />
-        </View>
+        {/* SUBSTITUIR PLACEHOLDER DA CÂMERA PELA LOGO */}
+        <Image source={logoImage} style={styles.logoImage} /> {/* <--- NOVO */}
+        
         <Text style={styles.storeName}>{profileData.name}</Text>
         <Text style={[
             styles.storeStatus,
@@ -218,14 +199,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 32,
   },
-  imagePlaceholder: {
-    backgroundColor: '#f2f2f2',
-    borderRadius: 50,
-    width: 100,
-    height: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
+  // REMOVER imagePicker, pois será substituído pela logoImage
+  // imagePicker: {
+  //   backgroundColor: '#f2f2f2',
+  //   borderRadius: 50,
+  //   width: 100,
+  //   height: 100,
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  //   marginBottom: 12,
+  // },
+  logoImage: { // <--- NOVO ESTILO PARA A LOGO
+    width: 100, // Ajuste o tamanho conforme necessário
+    height: 100, // Ajuste o tamanho conforme necessário
+    borderRadius: 50, // Para deixá-la circular, se a imagem permitir
     marginBottom: 12,
+    resizeMode: 'contain', // Ou 'cover', dependendo de como a logo deve se ajustar
   },
   storeName: {
     fontSize: 20,
