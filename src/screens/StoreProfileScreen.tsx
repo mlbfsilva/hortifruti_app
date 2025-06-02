@@ -3,23 +3,20 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
-// Importar os tipos de perfil e a lista de parâmetros do ProfileStack
 import { ProfileStackParamList } from '../navigation/ProfileStack';
 import { StoreProfile, StoreAddress, PaymentMethods } from '../types/profile';
 
-// Importar o componente de modal de confirmação de saída
 import ExitConfirmationModal from '../components/ExitConfirmationModal';
-
-// Definir o tipo das props para esta tela, usando ProfileStackParamList
-type StoreProfileScreenProps = StackScreenProps<ProfileStackParamList, 'StoreProfile'>;
 
 // Dados mockados para simular o perfil da loja (você substituirá isso por dados reais)
 const mockStoreProfile: StoreProfile = {
   id: 'store-123',
   name: 'Hortifruti Gostinho Bom',
   email: 'hortifrutigostinhobom.com.br',
-  phone: '(XX) XXXX-XXXX', // Exemplo
+  phone: '(XX) XXXX-XXXX',
   status: 'Aberto',
   openingHours: {
     from: '09:00',
@@ -32,37 +29,53 @@ const mockStoreAddress: StoreAddress = {
   state: 'Distrito Federal',
   city: 'Taguatinga',
   street: 'QS 07',
-  number: 'S/N', // Exemplo
+  number: 'S/N',
   complement: 'Loja',
 };
 
-const mockPaymentMethods: PaymentMethods = {
+// EXPORTAR mockPaymentMethods para que EditPaymentMethodsScreen possa manipulá-lo
+export let mockPaymentMethods: PaymentMethods = {
   pix: true,
   creditCard: true,
   debitCard: true,
 };
+// --- FIM DOS DADOS MOCKADOS ---
+
+
+type StoreProfileScreenProps = StackScreenProps<ProfileStackParamList, 'StoreProfile'>;
 
 export default function StoreProfileScreen({ navigation }: StoreProfileScreenProps) {
-  const profile = mockStoreProfile;
-  const address = mockStoreAddress;
-  const paymentMethods = mockPaymentMethods;
+  // Use estados locais para os dados do perfil, endereço e métodos de pagamento
+  // Eles serão atualizados via useFocusEffect
+  const [profileData, setProfileData] = useState<StoreProfile>(mockStoreProfile);
+  const [addressData, setAddressData] = useState<StoreAddress>(mockStoreAddress);
+  const [paymentMethodsData, setPaymentMethodsData] = useState<PaymentMethods>(mockPaymentMethods);
 
-  // Estado para controlar a visibilidade do modal de saída
+  // Use useFocusEffect para recarregar os dados sempre que a tela for focada
+  useFocusEffect(
+    useCallback(() => {
+      // Atualize os estados locais com os dados globais mockados
+      setProfileData(mockStoreProfile);
+      setAddressData(mockStoreAddress);
+      setPaymentMethodsData(mockPaymentMethods);
+      return () => {
+        // Opcional: Lógica de limpeza quando a tela perde o foco
+      };
+    }, [])
+  );
+
+
   const [isExitModalVisible, setExitModalVisible] = useState(false);
 
-  // Função para abrir o modal de confirmação de saída
   const handleLogout = () => {
     setExitModalVisible(true);
   };
 
-  // Função para confirmar a saída (executada ao clicar "Sim, quero sair")
   const confirmLogout = () => {
     setExitModalVisible(false);
     console.log('Usuário confirmou a saída da conta!');
-    // Exemplo: navigation.navigate('LoginScreen'); ou limpar tokens de autenticação
   };
 
-  // Função para cancelar a saída (executada ao clicar "Não")
   const cancelLogout = () => {
     setExitModalVisible(false);
     console.log('Saída cancelada.');
@@ -76,13 +89,13 @@ export default function StoreProfileScreen({ navigation }: StoreProfileScreenPro
         <View style={styles.imagePlaceholder}>
           <Ionicons name="camera" size={40} color="#888" />
         </View>
-        <Text style={styles.storeName}>{profile.name}</Text>
-        <Text style={styles.storeStatus}>Status: {profile.status}</Text>
+        <Text style={styles.storeName}>{profileData.name}</Text>
+        <Text style={styles.storeStatus}>Status: {profileData.status}</Text>
       </View>
 
       <TouchableOpacity
         style={styles.menuItem}
-        onPress={() => navigation.navigate('EditStoreInfo', { profile: profile })}
+        onPress={() => navigation.navigate('EditStoreInfo', { profile: profileData })}
       >
         <Text style={styles.menuItemText}>Informações de Loja</Text>
         <Ionicons name="chevron-forward" size={24} color="#888" />
@@ -90,7 +103,7 @@ export default function StoreProfileScreen({ navigation }: StoreProfileScreenPro
 
       <TouchableOpacity
         style={styles.menuItem}
-        onPress={() => navigation.navigate('EditAddress', { address: address })}
+        onPress={() => navigation.navigate('EditAddress', { address: addressData })}
       >
         <Text style={styles.menuItemText}>Endereço da Loja</Text>
         <Ionicons name="chevron-forward" size={24} color="#888" />
@@ -98,28 +111,25 @@ export default function StoreProfileScreen({ navigation }: StoreProfileScreenPro
 
       <TouchableOpacity
         style={styles.menuItem}
-        onPress={() => navigation.navigate('EditPaymentMethods', { paymentMethods: paymentMethods })}
+        onPress={() => navigation.navigate('EditPaymentMethods', { paymentMethods: paymentMethodsData })}
       >
         <Text style={styles.menuItemText}>Formas de Pagamento</Text>
         <Ionicons name="chevron-forward" size={24} color="#888" />
       </TouchableOpacity>
 
-      {/* NOVO ITEM DE MENU: PROMOÇÕES */}
       <TouchableOpacity
         style={styles.menuItem}
-        onPress={() => navigation.navigate('Promotions')} // Navega para a tela de Promoções
+        onPress={() => navigation.navigate('Promotions')}
       >
         <Text style={styles.menuItemText}>Promoções</Text>
-        <Ionicons name="pricetags-outline" size={24} color="#888" /> {/* Ícone de tags de preço */}
+        <Ionicons name="pricetags-outline" size={24} color="#888" />
       </TouchableOpacity>
 
-      {/* Botão "Sair" que agora chama o modal de confirmação */}
       <TouchableOpacity style={[styles.menuItem, styles.logoutButton]} onPress={handleLogout}>
         <Text style={[styles.menuItemText, styles.logoutButtonText]}>Sair</Text>
         <Ionicons name="log-out-outline" size={24} color="#FF6347" />
       </TouchableOpacity>
 
-      {/* Renderizar o componente ExitConfirmationModal */}
       <ExitConfirmationModal
         isVisible={isExitModalVisible}
         onConfirm={confirmLogout}
@@ -162,7 +172,7 @@ const styles = StyleSheet.create({
   },
   storeStatus: {
     fontSize: 16,
-    color: '#19C37D', // Cor para status "Aberto"
+    color: '#19C37D',
     fontWeight: '500',
     marginTop: 4,
   },
@@ -187,7 +197,7 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     marginTop: 30,
-    backgroundColor: '#ffe6e6', // Fundo mais claro para o botão de sair
+    backgroundColor: '#ffe6e6',
     borderColor: '#FF6347',
     borderWidth: 1,
   },
