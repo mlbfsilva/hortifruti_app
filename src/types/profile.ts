@@ -29,7 +29,7 @@ export type StoreProfile = {
     // Adicione outras formas de pagamento conforme necessário
   };
   
-  // NOVO: Tipo para uma promoção
+  //  Tipo para uma promoção
 export type Promotion = {
   id: string;
   productId: string; // ID do produto ao qual a promoção se aplica

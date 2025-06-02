@@ -211,7 +211,7 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
       </TouchableOpacity>
       <Text style={styles.header}>{isEditing ? 'Editar Promoção' : 'Adicionar Promoção'}</Text>
 
-      {/* NOVO: EXIBIR IMAGEM DO PRODUTO DA PROMOÇÃO OU PLACEHOLDER DA CÂMERA */}
+      {/* EXIBIR IMAGEM DO PRODUTO DA PROMOÇÃO OU PLACEHOLDER DA CÂMERA */}
       {initialPromotion?.imageUrl ? ( // Verifica se a imagem existe na promoção
         <Image source={initialPromotion.imageUrl} style={styles.promotionProductImage} />
       ) : (

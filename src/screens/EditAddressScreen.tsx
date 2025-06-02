@@ -11,7 +11,7 @@ import { StoreAddress } from '../types/profile'; // Importar o tipo StoreAddress
 import SuccessModal from '../components/SuccessModal';
 
 // Importar a lista mockada de endereço da loja para simular a atualização
-import { mockStoreAddress as globalMockStoreAddress } from './StoreProfileScreen'; // <--- NOVO
+import { mockStoreAddress as globalMockStoreAddress } from './StoreProfileScreen'; 
 
 // Função simulada para salvar/atualizar o endereço da loja
 const simulateSaveStoreAddressApi = async (updatedAddress: StoreAddress): Promise<boolean> => {
@@ -49,7 +49,7 @@ export default function EditAddressScreen({ route, navigation }: EditAddressScre
   const [successMessage, setSuccessMessage] = useState('');
 
 
-  const handleSave = async () => { // <--- AGORA É ASYNC
+  const handleSave = async () => { 
     // Validação básica
     if (cep.trim() === '' || state.trim() === '' || city.trim() === '' || street.trim() === '' || number.trim() === '') {
       Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');

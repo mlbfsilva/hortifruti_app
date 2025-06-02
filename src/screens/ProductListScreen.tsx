@@ -53,7 +53,7 @@ export default function ProductListScreen({ navigation }: Props) {
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 16 }}
         renderItem={({ item }) => {
-          console.log('Renderizando imagem:', item.imageUrl); // <--- ADICIONE ESTE LOG
+          console.log('Renderizando imagem:', item.imageUrl); 
           return (
             <View style={styles.card}>
               {item.imageUrl && (

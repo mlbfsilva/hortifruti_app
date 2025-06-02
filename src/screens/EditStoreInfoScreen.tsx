@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   },
   timeSeparator: {
     fontSize: 15,
-    color: '#666', // <--- CORREÇÃO AQUI: String terminada corretamente
+    color: '#666', 
     marginHorizontal: 4,
   },
   statusRow: {

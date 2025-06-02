@@ -50,7 +50,7 @@ export default function ProductEditScreen({ route, navigation }: ProductEditScre
     <View style={styles.container}>
       <Text style={styles.header}>Editar Produto</Text>
 
-      {/* NOVO: EXIBIR IMAGEM DO PRODUTO OU PLACEHOLDER DA CÂMERA */}
+      {/*EXIBIR IMAGEM DO PRODUTO OU PLACEHOLDER DA CÂMERA */}
       {initialProduct.imageUrl ? (
         <Image source={initialProduct.imageUrl} style={styles.productImage} />
       ) : (
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 24,
   },
-  productImage: { // NOVO: Estilo para a imagem do produto
+  productImage: { // Estilo para a imagem do produto
     alignSelf: 'center',
     width: 80,
     height: 80,

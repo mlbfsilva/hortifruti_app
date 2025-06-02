@@ -18,8 +18,8 @@ export type ProfileStackParamList = {
   EditAddress: { address: StoreAddress };
   EditPaymentMethods: { paymentMethods: PaymentMethods };
   Promotions: undefined;
-  // CORREÇÃO: Torne o parâmetro 'promotion' opcional usando '?'
-  EditPromotion: { promotion?: Promotion }; // <--- AQUI ESTÁ A CORREÇÃO NECESSÁRIA
+  // parâmetro 'promotion' opcional usando '?'
+  EditPromotion: { promotion?: Promotion }; 
   // Outras rotas relacionadas ao perfil podem ser adicionadas aqui
 };
 

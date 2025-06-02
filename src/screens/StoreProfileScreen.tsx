@@ -12,7 +12,7 @@ import { StoreProfile, StoreAddress, PaymentMethods } from '../types/profile';
 import ExitConfirmationModal from '../components/ExitConfirmationModal';
 
 // --- IMPORTAR A IMAGEM DA LOGO ---
-const logoImage = require('../assets/images/logo_gostinho_bom.png'); // <--- NOVO
+const logoImage = require('../assets/images/logo_gostinho_bom.png'); 
 
 // --- DADOS MOCKADOS (SIMULANDO UM BANCO DE DADOS/API) ---
 export let mockStoreProfile: StoreProfile = {
@@ -123,7 +123,7 @@ export default function StoreProfileScreen({ navigation }: StoreProfileScreenPro
 
       <View style={styles.profileHeader}>
         {/* SUBSTITUIR PLACEHOLDER DA CÂMERA PELA LOGO */}
-        <Image source={logoImage} style={styles.logoImage} /> {/* <--- NOVO */}
+        <Image source={logoImage} style={styles.logoImage} /> 
         
         <Text style={styles.storeName}>{profileData.name}</Text>
         <Text style={[
@@ -199,17 +199,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 32,
   },
-  // REMOVER imagePicker, pois será substituído pela logoImage
-  // imagePicker: {
-  //   backgroundColor: '#f2f2f2',
-  //   borderRadius: 50,
-  //   width: 100,
-  //   height: 100,
-  //   alignItems: 'center',
-  //   justifyContent: 'center',
-  //   marginBottom: 12,
-  // },
-  logoImage: { // <--- NOVO ESTILO PARA A LOGO
+  
+  logoImage: { // <--- ESTILO PARA A LOGO
     width: 100, // Ajuste o tamanho conforme necessário
     height: 100, // Ajuste o tamanho conforme necessário
     borderRadius: 50, // Para deixá-la circular, se a imagem permitir

@@ -50,7 +50,7 @@ export default function PromotionsScreen({ navigation }: PromotionsScreenProps) 
         contentContainerStyle={{ paddingBottom: 16 }}
         renderItem={({ item }) => (
           <View style={styles.promotionCard}>
-            {/* NOVO: EXIBIR IMAGEM */}
+            {/*  EXIBIR IMAGEM */}
             {item.imageUrl && ( // Verifica se a imagem existe
               <Image source={item.imageUrl} style={styles.promotionImage} />
             )}
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
-  // NOVO: Estilo para a imagem da promoção
+  // Estilo para a imagem da promoção
   promotionImage: {
     width: 60, // Ajuste o tamanho conforme o design
     height: 60,

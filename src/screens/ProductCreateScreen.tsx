@@ -8,7 +8,7 @@ import SuccessModal from '../components/SuccessModal';
 import { Product } from '../types/product'; // Importar o tipo Product
 
 // Importar a lista mockada de produtos para simular a adição
-import { mockProductsData as globalMockProductsData } from './ProductEditScreen'; // <--- NOVO: Importar a lista global
+import { mockProductsData as globalMockProductsData } from './ProductEditScreen'; //  Importar a lista global
 
 // Função simulada para adicionar um produto (simula uma chamada de API)
 const simulateAddProductApi = async (newProduct: Product): Promise<boolean> => {
@@ -34,7 +34,7 @@ export default function ProductCreateScreen({ navigation }: ProductCreateScreenP
   const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleAddProduct = async () => { // <--- AGORA É ASYNC
+  const handleAddProduct = async () => { 
     setErrorMessage('');
 
     if (name.trim() === '' || type.trim() === '' || price.trim() === '') {
@@ -101,10 +101,9 @@ export default function ProductCreateScreen({ navigation }: ProductCreateScreenP
       console.log('handleAddProduct: Produto adicionado com sucesso!');
       setSuccessModalVisible(true); // Exibe o modal de sucesso
     } else {
-      // Se a simulação falhar (o que não deve acontecer neste caso), ou se o código real falhar
+     
       console.log('handleAddProduct: Falha ao adicionar produto.');
-      // A mensagem de erro já foi definida no bloco try/catch do código real
-      // Ou você pode adicionar um Alert.alert('Erro', 'Não foi possível adicionar o produto.'); aqui
+     
     }
   };
 

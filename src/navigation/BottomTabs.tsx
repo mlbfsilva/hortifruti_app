@@ -1,22 +1,17 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { View, Text, StyleSheet } from 'react-native'; // <--- Importe StyleSheet também
-
-// IMPORTE OS SEUS STACKS REAIS
+import { View, Text, StyleSheet } from 'react-native';
+// IMPORTE OS SEUS STACKS E TELAS REAIS
 import ProductStack from './ProductStack';
 import ProfileStack from './ProfileStack';
+// PedidosScreen e DashboardScreen não precisam ser importados se usarmos 'children' com View diretamente
+// import PedidosScreen from '../screens/PedidosScreen';
+// import DashboardScreen from '../screens/DashboardScreen';
 
 const Tab = createBottomTabNavigator();
 
-// Componente Placeholder com fundo e texto bem visíveis para depuração
-function Placeholder({ title }: { title: string }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'purple' }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', color: 'white' }}>{title}</Text>
-    </View>
-  );
-}
+
 
 export default function BottomTabs() {
   return (
@@ -26,18 +21,25 @@ export default function BottomTabs() {
           let iconName = '';
           if (route.name === 'Pedidos') iconName = 'list';
           else if (route.name === 'Dashboard') iconName = 'stats-chart';
-          else if (route.name === 'Produtos') iconName = 'pricetags';
-          else if (route.name === 'Perfil') iconName = 'person';
+          else if (route.name === 'Produtos') iconName = 'pricetags'; 
+          else if (route.name === 'Perfil') iconName = 'person';    
           return <Ionicons name={iconName as any} size={size} color={color} />;
         },
         tabBarActiveTintColor: '#222',
         tabBarInactiveTintColor: '#aaa',
         headerShown: false,
-       
+        
       })}
     >
-      <Tab.Screen name="Pedidos" children={() => <Placeholder title="Pedidos" />} />
-      <Tab.Screen name="Dashboard" children={() => <Placeholder title="Dashboard" />} />
+      {/* TELAS DE PEDIDOS E DASHBOARD USAM 'children' COM View BRANCA */}
+      <Tab.Screen name="Pedidos" children={() => (
+        <View style={{ flex: 1, backgroundColor: '#FFFFFF' }} /> // Tela branca
+      )} />
+      <Tab.Screen name="Dashboard" children={() => (
+        <View style={{ flex: 1, backgroundColor: '#FFFFFF' }} /> // Tela branca
+      )} />
+
+      {/* ABAS DE PRODUTOS E PERFIL */}
       <Tab.Screen name="Produtos" component={ProductStack} />
       <Tab.Screen name="Perfil" component={ProfileStack} />
     </Tab.Navigator>
