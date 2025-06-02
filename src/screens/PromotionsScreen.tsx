@@ -1,26 +1,41 @@
 // src/screens/PromotionsScreen.tsx
-import React from 'react';
+import React, { useState } from 'react'; // Importar useState
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
+import { useFocusEffect } from '@react-navigation/native'; // <--- IMPORTAR useFocusEffect
+import { useCallback } from 'react'; // <--- IMPORTAR useCallback
 
-// Importar a lista de parâmetros do ProfileStack
-import { ProfileStackParamList } from '../navigation/ProfileStack'; // Ajuste o caminho se necessário
+import { ProfileStackParamList } from '../navigation/ProfileStack';
+import { Promotion } from '../types/profile';
 
-// IMPORTAR O TIPO 'Promotion' DIRETAMENTE DE 'src/types/profile.ts'
-import { Promotion } from '../types/profile'; // <--- CORREÇÃO AQUI
-
-// Definir o tipo das props para esta tela
-type PromotionsScreenProps = StackScreenProps<ProfileStackParamList, 'Promotions'>;
-
-// Dados mockados para simular promoções
-const mockPromotions: Promotion[] = [
+// --- DADOS MOCKADOS (SIMULANDO UM BANCO DE DADOS/API) ---
+// Em um aplicativo real, esta lista viria de um estado global ou de uma API.
+// Para este exemplo, vamos simular a remoção daqui.
+export let mockPromotionsData: Promotion[] = [ // <--- ADICIONAR 'export' AQUI
   { id: 'promo1', productId: '1', productName: 'Banana', productType: 'Fruta', promotionPrice: 1.99, unit: 'Kg' },
   { id: 'promo2', productId: '2', productName: 'Maçã', productType: 'Fruta', promotionPrice: 1.50, unit: 'Kg' },
   { id: 'promo3', productId: '3', productName: 'Alface', productType: 'Verdura', promotionPrice: 0.99, unit: 'Unid.' },
 ];
+// --- FIM DOS DADOS MOCKADOS ---
+
+// Definir o tipo das props para esta tela
+type PromotionsScreenProps = StackScreenProps<ProfileStackParamList, 'Promotions'>;
 
 export default function PromotionsScreen({ navigation }: PromotionsScreenProps) {
+  const [promotions, setPromotions] = useState<Promotion[]>([]); // <--- NOVO: Estado para a lista de promoções
+
+  // Use useFocusEffect para recarregar os dados sempre que a tela for focada
+  useFocusEffect(
+    useCallback(() => {
+      // Quando a tela é focada, atualize a lista de promoções com os dados globais mockados
+      setPromotions(mockPromotionsData); // <--- ATUALIZA O ESTADO COM OS DADOS GLOBAIS
+      return () => {
+        // Opcional: Lógica de limpeza quando a tela perde o foco
+      };
+    }, [])
+  );
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -31,7 +46,7 @@ export default function PromotionsScreen({ navigation }: PromotionsScreenProps) 
       <Text style={styles.subHeader}>Adicione as promoções sobre seus produtos:</Text>
 
       <FlatList
-        data={mockPromotions}
+        data={promotions} // <--- USAR O ESTADO 'promotions'
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingBottom: 16 }}
         renderItem={({ item }) => (

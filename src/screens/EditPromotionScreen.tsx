@@ -11,7 +11,30 @@ import { ProfileStackParamList } from '../navigation/ProfileStack';
 import { Promotion } from '../types/profile';
 
 // IMPORTAR O NOVO COMPONENTE ConfirmationModal
-import ConfirmationModal from '../components/ConfirmationModal'; // <--- NOVO
+import ConfirmationModal from '../components/ConfirmationModal';
+
+// Importar a lista mockada de promoções para simular a exclusão
+import { mockPromotionsData } from './PromotionsScreen'; // <--- NOVO
+
+// Função simulada para remover uma promoção (simula uma chamada de API)
+const simulateDeletePromotionApi = async (promotionId: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    setTimeout(() => { // Simula um atraso de rede
+      const initialLength = mockPromotionsData.length;
+      const index = mockPromotionsData.findIndex(p => p.id === promotionId);
+      if (index > -1) {
+        mockPromotionsData.splice(index, 1); // Remove o item
+        console.log(`Promoção ${promotionId} removida da lista mockada.`);
+        resolve(true); // Sucesso
+      } else {
+        console.log(`Promoção ${promotionId} não encontrada na lista mockada.`);
+        resolve(false); // Falha (não encontrado)
+      }
+    }, 500); // 0.5 segundos de atraso
+  });
+};
+// --- FIM DOS DADOS MOCKADOS ---
+
 
 // Definir o tipo das props para esta tela
 type EditPromotionScreenProps = StackScreenProps<ProfileStackParamList, 'EditPromotion'>;
@@ -53,10 +76,10 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
 
     if (isEditing) {
       console.log('Promoção atualizada:', newOrUpdatedPromotion);
-      Alert.alert('Sucesso', 'Promoção atualizada com sucesso!'); // Este Alert ainda pode não ser visível no Canvas
+      Alert.alert('Sucesso', 'Promoção atualizada com sucesso!');
     } else {
       console.log('Nova promoção adicionada:', newOrUpdatedPromotion);
-      Alert.alert('Sucesso', 'Promoção adicionada com sucesso!'); // Este Alert ainda pode não ser visível no Canvas
+      Alert.alert('Sucesso', 'Promoção adicionada com sucesso!');
     }
     navigation.goBack();
   };
@@ -67,17 +90,66 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
   };
 
   // FUNÇÃO PARA CONFIRMAR A EXCLUSÃO (chamada pelo modal)
-  const confirmDelete = () => {
-    setDeleteModalVisible(false); // Fecha o modal
-    // --- SUA LÓGICA REAL DE EXCLUSÃO DE PROMOÇÃO AQUI ---
-    console.log(`Promoção ${initialPromotion?.productName} excluída!`);
-    // Alert.alert('Excluído', 'Promoção excluída com sucesso!'); // Este Alert ainda pode não ser visível no Canvas
-    navigation.goBack(); // Volta para a tela anterior
+  const confirmDelete = async () => { // <--- AGORA É ASYNC
+    setDeleteModalVisible(false); // Fecha o modal imediatamente
+
+    let success = false; // Variável para controlar o resultado da exclusão
+
+    // --- CÓDIGO REAL (COM BACKEND) - COMENTADO ---
+    /*
+    try {
+      console.log(`Tentando excluir promoção ${initialPromotion?.id} do backend...`);
+      const response = await fetch(`https://sua-api.com/promocoes/${initialPromotion?.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          // 'Authorization': `Bearer ${seuTokenDeAutenticacao}`, // Se precisar de autenticação
+        },
+      });
+
+      if (response.ok) { // Verifica se a resposta foi 2xx (sucesso)
+        console.log(`Promoção ${initialPromotion?.productName} excluída com sucesso do backend.`);
+        success = true; // Define success como true se a API retornar sucesso
+      } else {
+        const errorData = await response.json(); // Tenta ler a mensagem de erro da API
+        console.error('Erro ao excluir promoção no backend:', response.status, errorData);
+        success = false; // Define success como false em caso de erro da API
+      }
+    } catch (error) {
+      console.error('Erro de rede ou na requisição de exclusão:', error);
+      success = false; // Define success como false em caso de erro de rede
+    }
+    */
+    // --- FIM DO CÓDIGO REAL (COM BACKEND) - COMENTADO ---
+
+    // --- CÓDIGO DE SIMULAÇÃO (ATIVO) ---
+    // Este bloco só é executado se o bloco de código real acima estiver comentado.
+    if (!success) { // Se o código real não foi executado ou falhou
+      if (initialPromotion?.id) { // Garante que há um ID para excluir
+        success = await simulateDeletePromotionApi(initialPromotion.id);
+      } else {
+        console.error('ID da promoção não encontrado para exclusão simulada.');
+        success = false;
+      }
+    }
+    // --- FIM DO CÓDIGO DE SIMULAÇÃO ---
+
+
+    if (success) { // 'success' virá da chamada da API real ou da simulação
+      console.log(`Promoção ${initialPromotion?.productName} excluída com sucesso!`);
+      Alert.alert('Excluído', 'Promoção excluída com sucesso!');
+      // NAVEGA DE VOLTA E, O IDEAL, ATUALIZA A TELA ANTERIOR (PromotionsScreen)
+      // PromotionsScreen precisará usar useFocusEffect para recarregar mockPromotionsData
+      navigation.goBack();
+    } else {
+      console.log(`Falha ao excluir promoção ${initialPromotion?.productName}.`);
+      Alert.alert('Erro', 'Não foi possível excluir a promoção.');
+    }
   };
 
   // FUNÇÃO PARA CANCELAR A EXCLUSÃO (chamada pelo modal)
   const cancelDelete = () => {
-    setDeleteModalVisible(false); // Fecha o modal
+    setDeleteModalVisible(false);
     console.log('Exclusão de promoção cancelada.');
   };
 
@@ -153,7 +225,7 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
         cancelText="Não"
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
-        confirmButtonColor="#FF6347" // Cor vermelha para exclusão
+        confirmButtonColor="#FF6347"
         confirmButtonTextColor="white"
       />
     </View>
