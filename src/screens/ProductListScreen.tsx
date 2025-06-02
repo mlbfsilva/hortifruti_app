@@ -60,15 +60,16 @@ export default function ProductListScreen({ navigation }: Props) {
                 <Image source={item.imageUrl} style={styles.productImage} />
               )}
               <View style={styles.productInfo}>
-                <Text style={styles.productName}>Produto: {item.name}</Text>
-                <Text style={styles.productType}>Tipo: {item.type}</Text>
-                <Text style={styles.productPrice}>Preço: R$ {item.price.toFixed(2)} {item.unit}</Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('EditProduct', { product: item })}
-              >
-                <Ionicons name="pencil" size={22} color="#444" />
-              </TouchableOpacity>
+              {/* CORREÇÃO AQUI: Removendo os rótulos estáticos */}
+              <Text style={styles.productName}>{item.name}</Text>
+              <Text style={styles.productType}>{item.type}</Text>
+              <Text style={styles.productPrice}>R$ {item.price.toFixed(2)} {item.unit}</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('EditProduct', { product: item })}
+            >
+              <Ionicons name="pencil" size={22} color="#444" />
+            </TouchableOpacity>
             </View>
           );
         }}

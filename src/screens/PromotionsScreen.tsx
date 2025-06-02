@@ -55,8 +55,9 @@ export default function PromotionsScreen({ navigation }: PromotionsScreenProps) 
               <Image source={item.imageUrl} style={styles.promotionImage} />
             )}
             <View style={styles.promotionInfo}>
-              <Text style={styles.promotionText}>Produto: {item.productName}</Text>
-              <Text style={styles.promotionText}>Promoção: R$ {item.promotionPrice.toFixed(2)} {item.unit}</Text>
+              <Text style={styles.promotionText}>{item.productName}</Text>
+              <Text style={styles.promotionText}>{item.productType}</Text>
+              <Text style={styles.promotionText}>R$ {item.promotionPrice.toFixed(2)} {item.unit}</Text>
             </View>
             <TouchableOpacity
               style={styles.editButton}
