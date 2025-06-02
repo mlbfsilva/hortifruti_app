@@ -1,6 +1,6 @@
 // src/screens/ProductEditScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from 'react-native'; // <--- IMPORTAR Image
 import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
 
@@ -8,54 +8,22 @@ import { ProductStackParamList } from '../navigation/ProductStack';
 import ConfirmationModal from '../components/ConfirmationModal';
 import SuccessModal from '../components/SuccessModal';
 
-import { Product } from '../types/product'; // Certifique-se de que o tipo Product está importado
+import { Product } from '../types/product';
 
-// Definição do tipo das props para esta tela
 type ProductEditScreenProps = StackScreenProps<ProductStackParamList, 'EditProduct'>;
 
-// --- DADOS MOCKADOS (AGORA COM IMAGENS LOCAIS) ---
-// Certifique-se de que as imagens estão na pasta src/assets/images/
-export let mockProductsData: Product[] = [ // 'export' é necessário para ProductListScreen
+// --- DADOS MOCKADOS (SIMULANDO UM BANCO DE DADOS/API) ---
+export let mockProductsData: Product[] = [
   { id: '1', name: 'Banana', type: 'Fruta', price: 5.9, unit: 'Kg', imageUrl: require('../assets/images/banana.png') },
   { id: '2', name: 'Maçã', type: 'Fruta', price: 6.5, unit: 'Kg', imageUrl: require('../assets/images/maca.png') },
   { id: '3', name: 'Alface', type: 'Verdura', price: 3.2, unit: 'Unid.', imageUrl: require('../assets/images/alface.png') },
   { id: '4', name: 'Tomate', type: 'Fruta', price: 4.8, unit: 'Kg', imageUrl: require('../assets/images/tomate.png') },
 ];
 
-// Função simulada para remover um produto (simula uma chamada de API)
-const simulateDeleteProductApi = async (productId: string): Promise<boolean> => {
-  return new Promise((resolve) => {
-    setTimeout(() => { // Simula um atraso de rede
-      const initialLength = mockProductsData.length;
-      mockProductsData = mockProductsData.filter(p => p.id !== productId);
-      if (mockProductsData.length < initialLength) {
-        console.log(`Produto ${productId} removido da lista mockada.`);
-        resolve(true); // Sucesso
-      } else {
-        console.log(`Produto ${productId} não encontrado na lista mockada.`);
-        resolve(false); // Falha (não encontrado)
-      }
-    }, 500); // 0.5 segundos de atraso
-  });
-};
-
+// Função simulada para remover um produto
+const simulateDeleteProductApi = async (productId: string): Promise<boolean> => { /* ... */ return true; };
 // Função simulada para salvar/atualizar um produto
-const simulateSaveProductApi = async (updatedProduct: Product): Promise<boolean> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const index = mockProductsData.findIndex(p => p.id === updatedProduct.id);
-      if (index > -1) {
-        mockProductsData[index] = updatedProduct; // Atualiza o produto existente
-        console.log('simulateSaveProductApi: Produto atualizado na lista mockada:', updatedProduct);
-        resolve(true);
-      } else {
-        console.log('simulateSaveProductApi: Produto não encontrado para atualização, adicionando como novo (não deveria ocorrer na edição):', updatedProduct);
-        mockProductsData.push(updatedProduct); // Isso não deve acontecer para uma atualização de um produto existente
-        resolve(true);
-      }
-    }, 500);
-  });
-};
+const simulateSaveProductApi = async (updatedProduct: Product): Promise<boolean> => { /* ... */ return true; };
 // --- FIM DOS DADOS MOCKADOS ---
 
 
@@ -72,112 +40,25 @@ export default function ProductEditScreen({ route, navigation }: ProductEditScre
   const [successMessage, setSuccessMessage] = useState('');
 
 
-  const handleSave = async () => {
-    // Validação básica
-    if (name.trim() === '' || type.trim() === '' || price.trim() === '') {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
-      return;
-    }
-    const priceValue = parseFloat(price.replace(',', '.'));
-    if (isNaN(priceValue)) {
-      Alert.alert('Erro', 'Preço inválido.');
-      return;
-    }
-
-    const updatedProduct: Product = {
-      ...initialProduct, // Mantém o ID original
-      name,
-      type,
-      price: priceValue,
-      unit,
-    };
-
-    let success = false;
-
-    // --- CÓDIGO REAL (COM BACKEND) - COMENTADO ---
-    /*
-    try {
-      console.log(`Tentando atualizar produto ${updatedProduct.id} no backend...`);
-      const response = await fetch(`https://sua-api.com/produtos/${updatedProduct.id}`, {
-        method: 'PUT', // Geralmente PUT para atualização
-        headers: {
-          'Content-Type': 'application/json',
-          // 'Authorization': `Bearer ${seuTokenDeAutenticacao}`,
-        },
-        body: JSON.stringify(updatedProduct),
-      });
-
-      if (response.ok) {
-        const responseData = await response.json();
-        console.log('Produto atualizado com sucesso no backend:', responseData);
-        success = true;
-      } else {
-        const errorData = await response.json();
-        console.error('Erro ao atualizar produto no backend:', response.status, errorData);
-        Alert.alert('Erro', `Não foi possível salvar as alterações: ${errorData.message || 'Tente novamente.'}`);
-        success = false;
-      }
-    } catch (error) {
-      console.error('Erro de rede ou na requisição de salvar:', error);
-      Alert.alert('Erro', 'Erro de conexão. Tente novamente.');
-      success = false;
-    }
-    */
-    // --- FIM DO CÓDIGO REAL (COM BACKEND) - COMENTADO ---
-
-    // --- CÓDIGO DE SIMULAÇÃO (ATIVO) ---
-    if (!success) { // Se o código real não foi executado ou falhou
-      success = await simulateSaveProductApi(updatedProduct);
-    }
-    // --- FIM DO CÓDIGO DE SIMULAÇÃO ---
-
-
-    if (success) {
-      setSuccessMessage('Produto atualizado com sucesso!');
-      setSuccessModalVisible(true);
-    } else {
-      console.log(`Falha ao salvar alterações no produto ${initialProduct.name}.`);
-    }
-  };
-
-  const handleAdvanceFromSuccessModal = () => {
-    setSuccessModalVisible(false);
-    navigation.goBack();
-  };
-
-
-  const handleDelete = () => {
-    setDeleteModalVisible(true);
-  };
-
-  const confirmDelete = async () => {
-    setDeleteModalVisible(false);
-
-    let success = false;
-
-    if (!success) {
-      success = await simulateDeleteProductApi(initialProduct.id);
-    }
-
-    if (success) {
-      Alert.alert('Excluído', 'Produto excluído com sucesso!');
-      navigation.goBack();
-    } else {
-      console.log(`Falha ao excluir produto ${initialProduct.name}.`);
-    }
-  };
-
-  const cancelDelete = () => {
-    setDeleteModalVisible(false);
-    console.log('Exclusão cancelada.');
-  };
+  const handleSave = async () => { /* ... */ };
+  const handleAdvanceFromSuccessModal = () => { /* ... */ };
+  const handleDelete = () => { /* ... */ };
+  const confirmDelete = async () => { /* ... */ };
+  const cancelDelete = () => { /* ... */ };
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Editar Produto</Text>
-      <TouchableOpacity style={styles.imagePicker}>
-        <Ionicons name="camera" size={40} color="#888" />
-      </TouchableOpacity>
+
+      {/* NOVO: EXIBIR IMAGEM DO PRODUTO OU PLACEHOLDER DA CÂMERA */}
+      {initialProduct.imageUrl ? (
+        <Image source={initialProduct.imageUrl} style={styles.productImage} />
+      ) : (
+        <TouchableOpacity style={styles.imagePicker}>
+          <Ionicons name="camera" size={40} color="#888" />
+        </TouchableOpacity>
+      )}
+
       <Text style={styles.label}>Produto:</Text>
       <TextInput style={styles.input} value={name} onChangeText={setName} />
       <Text style={styles.label}>Tipo:</Text>
@@ -244,7 +125,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 16,
   },
-  imagePicker: {
+  imagePicker: { // Estilo para o placeholder da câmera
     alignSelf: 'center',
     backgroundColor: '#f2f2f2',
     borderRadius: 16,
@@ -253,6 +134,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
+  },
+  productImage: { // NOVO: Estilo para a imagem do produto
+    alignSelf: 'center',
+    width: 80,
+    height: 80,
+    borderRadius: 16,
+    marginBottom: 24,
+    resizeMode: 'cover', // Garante que a imagem preencha o espaço
   },
   label: {
     fontWeight: '500',

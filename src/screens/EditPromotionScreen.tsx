@@ -1,17 +1,15 @@
 // src/screens/EditPromotionScreen.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from 'react-native'; // <--- IMPORTAR Image
 import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
 
 import { ProfileStackParamList } from '../navigation/ProfileStack';
 import { Promotion } from '../types/profile';
 
-// IMPORTAR OS COMPONENTES DE MODAL
 import ConfirmationModal from '../components/ConfirmationModal';
 import SuccessModal from '../components/SuccessModal';
 
-// Importar a lista mockada de promoções para simular a exclusão
 import { mockPromotionsData } from './PromotionsScreen';
 
 // Função simulada para remover uma promoção (simula uma chamada de API)
@@ -67,7 +65,6 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
 
   const isEditing = !!initialPromotion;
 
-  // ESTADOS PARA CONTROLAR A VISIBILIDADE DOS MODAIS
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
   const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -92,6 +89,7 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
       productType,
       promotionPrice: priceValue,
       unit,
+      imageUrl: initialPromotion?.imageUrl, // <--- MANTER A URL DA IMAGEM
     };
 
     let success = false;
@@ -138,15 +136,13 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
       setSuccessMessage(isEditing ? 'Promoção atualizada com Sucesso!' : 'Promoção Adicionada com Sucesso!');
       setSuccessModalVisible(true);
     } else {
-      // Se a simulação falhar (o que não deve acontecer aqui), ou o código real falhar
       console.log(`Falha ao ${isEditing ? 'salvar' : 'adicionar'} promoção.`);
-      // Alert.alert já é chamado dentro do try/catch do código real, ou você pode adicionar um aqui
     }
   };
 
   const handleAdvanceFromSuccessModal = () => {
     setSuccessModalVisible(false);
-    navigation.goBack(); // Volta para a tela anterior (PromotionsScreen)
+    navigation.goBack();
   };
 
   const handleDelete = () => {
@@ -200,7 +196,6 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
       navigation.goBack();
     } else {
       console.log(`Falha ao excluir promoção ${initialPromotion?.productName}.`);
-      // Alert.alert já é chamado no bloco try/catch do código real
     }
   };
 
@@ -216,9 +211,14 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
       </TouchableOpacity>
       <Text style={styles.header}>{isEditing ? 'Editar Promoção' : 'Adicionar Promoção'}</Text>
 
-      <TouchableOpacity style={styles.imagePicker}>
-        <Ionicons name="camera" size={40} color="#888" />
-      </TouchableOpacity>
+      {/* NOVO: EXIBIR IMAGEM DO PRODUTO DA PROMOÇÃO OU PLACEHOLDER DA CÂMERA */}
+      {initialPromotion?.imageUrl ? ( // Verifica se a imagem existe na promoção
+        <Image source={initialPromotion.imageUrl} style={styles.promotionProductImage} />
+      ) : (
+        <TouchableOpacity style={styles.imagePicker}>
+          <Ionicons name="camera" size={40} color="#888" />
+        </TouchableOpacity>
+      )}
 
       <Text style={styles.label}>Produto:</Text>
       <TextInput
@@ -245,7 +245,7 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
           value={promotionPrice}
           onChangeText={setPromotionPrice}
           keyboardType="numeric"
-          placeholder="R$ 0,00"
+          placeholder="R$"
         />
         <TouchableOpacity
           style={[styles.unitButton, unit === 'Kg' && styles.unitButtonActive]}
@@ -271,7 +271,6 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
         </TouchableOpacity>
       )}
 
-      {/* RENDERIZAR O ConfirmationModal PARA EXCLUSÃO DA PROMOÇÃO */}
       <ConfirmationModal
         isVisible={isDeleteModalVisible}
         title="Excluir Promoção"
@@ -284,7 +283,6 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
         confirmButtonTextColor="white"
       />
 
-      {/* RENDERIZAR O SuccessModal PARA SUCESSO AO SALVAR */}
       <SuccessModal
         isVisible={isSuccessModalVisible}
         onAdvance={handleAdvanceFromSuccessModal}
@@ -313,7 +311,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 24,
   },
-  imagePicker: {
+  imagePicker: { // Estilo para o placeholder da câmera
     alignSelf: 'center',
     backgroundColor: '#f2f2f2',
     borderRadius: 16,
@@ -322,6 +320,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
+  },
+  promotionProductImage: { // NOVO: Estilo para a imagem do produto da promoção
+    alignSelf: 'center',
+    width: 80,
+    height: 80,
+    borderRadius: 16,
+    marginBottom: 24,
+    resizeMode: 'cover',
   },
   label: {
     fontWeight: '500',
