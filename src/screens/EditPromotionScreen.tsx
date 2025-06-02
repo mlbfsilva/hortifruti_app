@@ -5,10 +5,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
 
 // Importar a lista de parâmetros do ProfileStack
-import { ProfileStackParamList } from '../navigation/ProfileStack'; // Ajuste o caminho se necessário
+import { ProfileStackParamList } from '../navigation/ProfileStack';
 
 // IMPORTAR O TIPO 'Promotion' DIRETAMENTE DE 'src/types/profile.ts'
-import { Promotion } from '../types/profile'; // <--- CORREÇÃO AQUI
+import { Promotion } from '../types/profile';
+
+// IMPORTAR O NOVO COMPONENTE ConfirmationModal
+import ConfirmationModal from '../components/ConfirmationModal'; // <--- NOVO
 
 // Definir o tipo das props para esta tela
 type EditPromotionScreenProps = StackScreenProps<ProfileStackParamList, 'EditPromotion'>;
@@ -23,6 +26,9 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
   const [unit, setUnit] = useState<'Kg' | 'Unid.'>(initialPromotion?.unit === 'Kg' ? 'Kg' : 'Unid.');
 
   const isEditing = !!initialPromotion; // Verifica se está editando ou criando
+
+  // ESTADO PARA CONTROLAR A VISIBILIDADE DO MODAL DE EXCLUSÃO
+  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false); // <--- NOVO
 
   const handleSave = () => {
     if (productName.trim() === '' || productType.trim() === '' || promotionPrice.trim() === '') {
@@ -47,31 +53,32 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
 
     if (isEditing) {
       console.log('Promoção atualizada:', newOrUpdatedPromotion);
-      Alert.alert('Sucesso', 'Promoção atualizada com sucesso!');
+      Alert.alert('Sucesso', 'Promoção atualizada com sucesso!'); // Este Alert ainda pode não ser visível no Canvas
     } else {
       console.log('Nova promoção adicionada:', newOrUpdatedPromotion);
-      Alert.alert('Sucesso', 'Promoção adicionada com sucesso!');
+      Alert.alert('Sucesso', 'Promoção adicionada com sucesso!'); // Este Alert ainda pode não ser visível no Canvas
     }
     navigation.goBack();
   };
 
+  // FUNÇÃO PARA ABRIR O MODAL DE CONFIRMAÇÃO DE EXCLUSÃO
   const handleDelete = () => {
-    Alert.alert(
-      'Excluir Promoção',
-      'Tem certeza que deseja excluir esta promoção?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: () => {
-            console.log('Promoção excluída!');
-            Alert.alert('Excluído', 'Promoção excluída com sucesso!');
-            navigation.goBack();
-          },
-        },
-      ]
-    );
+    setDeleteModalVisible(true); // <--- SUBSTITUI Alert.alert
+  };
+
+  // FUNÇÃO PARA CONFIRMAR A EXCLUSÃO (chamada pelo modal)
+  const confirmDelete = () => {
+    setDeleteModalVisible(false); // Fecha o modal
+    // --- SUA LÓGICA REAL DE EXCLUSÃO DE PROMOÇÃO AQUI ---
+    console.log(`Promoção ${initialPromotion?.productName} excluída!`);
+    // Alert.alert('Excluído', 'Promoção excluída com sucesso!'); // Este Alert ainda pode não ser visível no Canvas
+    navigation.goBack(); // Volta para a tela anterior
+  };
+
+  // FUNÇÃO PARA CANCELAR A EXCLUSÃO (chamada pelo modal)
+  const cancelDelete = () => {
+    setDeleteModalVisible(false); // Fecha o modal
+    console.log('Exclusão de promoção cancelada.');
   };
 
   return (
@@ -136,6 +143,19 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
           <Text style={styles.deleteButtonText}>Excluir Promoção</Text>
         </TouchableOpacity>
       )}
+
+      {/* RENDERIZAR O ConfirmationModal PARA EXCLUSÃO DA PROMOÇÃO */}
+      <ConfirmationModal
+        isVisible={isDeleteModalVisible}
+        title="Excluir Promoção"
+        message={`Tem certeza que deseja excluir a promoção para "${initialPromotion?.productName || 'este item'}"?`}
+        confirmText="Sim, Excluir"
+        cancelText="Não"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+        confirmButtonColor="#FF6347" // Cor vermelha para exclusão
+        confirmButtonTextColor="white"
+      />
     </View>
   );
 }
