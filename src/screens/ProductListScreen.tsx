@@ -2,17 +2,14 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { useFocusEffect } from '@react-navigation/native'; // <--- IMPORTAR useFocusEffect
-import { useCallback } from 'react'; // <--- IMPORTAR useCallback
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
 import { ProductStackParamList } from '../navigation/ProductStack';
-import { Product } from '../types/product'; // Importe o tipo Product
+import { Product } from '../types/product';
 
 // --- DADOS MOCKADOS (IMPORTAR DE ProductEditScreen.tsx) ---
-// Para que a exclusão funcione, ProductListScreen precisa acessar a mesma lista.
-// Em um cenário real, você buscaria isso de um backend ou estado global.
-// Por enquanto, vamos importar a lista mockada que está sendo modificada.
-import { mockProductsData as globalMockProductsData } from './ProductEditScreen'; // <--- IMPORTAR A LISTA MOCKADA
+import { mockProductsData as globalMockProductsData } from './ProductEditScreen';
 
 // Defina o tipo do navigation para esta tela
 type ProductListScreenNavigationProp = StackNavigationProp<
@@ -26,21 +23,23 @@ type Props = {
 
 export default function ProductListScreen({ navigation }: Props) {
   const [search, setSearch] = useState('');
-  const [products, setProducts] = useState<Product[]>([]); // <--- NOVO: Estado para a lista de produtos
+  const [products, setProducts] = useState<Product[]>([]);
 
   // Use useFocusEffect para recarregar os dados sempre que a tela for focada
   useFocusEffect(
     useCallback(() => {
-      // Quando a tela é focada, atualize a lista de produtos com os dados globais mockados
-      setProducts(globalMockProductsData); // <--- ATUALIZA O ESTADO COM OS DADOS GLOBAIS
+      console.log('ProductListScreen: useFocusEffect acionado. Recarregando produtos...'); // <--- CONSOLE.LOG DE DEPURACAO
+      // Crie uma NOVA instância de array a partir dos dados globais mutáveis
+      setProducts([...globalMockProductsData]); // <--- CHAVE DA CORREÇÃO: Usar spread para criar nova referência
+      console.log('ProductListScreen: Produtos atualizados:', globalMockProductsData); // <--- CONSOLE.LOG DE DEPURACAO
       return () => {
         // Opcional: Lógica de limpeza quando a tela perde o foco
       };
-    }, [])
+    }, []) // Array de dependências vazio para rodar no foco da tela
   );
 
   // Filtra os produtos conforme o texto digitado
-  const filteredProducts = products.filter(product => // <--- USAR O ESTADO 'products'
+  const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(search.toLowerCase())
   );
 

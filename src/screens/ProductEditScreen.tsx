@@ -2,12 +2,12 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { StackScreenProps } from '@react-navigation/stack'; // Importe StackScreenProps
+import { StackScreenProps } from '@react-navigation/stack';
 
-import { ProductStackParamList } from '../navigation/ProductStack'; // Importe ProductStackParamList
+import { ProductStackParamList } from '../navigation/ProductStack';
 import ConfirmationModal from '../components/ConfirmationModal';
+import SuccessModal from '../components/SuccessModal';
 
-// Importe o tipo Product
 import { Product } from '../types/product';
 
 // --- NOVO: Definição do tipo das props para esta tela ---
@@ -16,7 +16,7 @@ type ProductEditScreenProps = StackScreenProps<ProductStackParamList, 'EditProdu
 
 // --- DADOS MOCKADOS (SIMULANDO UM BANCO DE DADOS/API) ---
 // Em um aplicativo real, esta lista viria de um estado global ou de uma API.
-// Para este exemplo, vamos simular a remoção daqui.
+// Para este exemplo, vamos simular a remoção e atualização daqui.
 export let mockProductsData: Product[] = [ // <--- 'export' é necessário para ProductListScreen
   { id: '1', name: 'Banana', type: 'Fruta', price: 5.9, unit: 'Kg' },
   { id: '2', name: 'Maçã', type: 'Fruta', price: 6.5, unit: 'Kg' },
@@ -40,6 +40,26 @@ const simulateDeleteProductApi = async (productId: string): Promise<boolean> => 
     }, 500); // 0.5 segundos de atraso
   });
 };
+
+// --- NOVA FUNÇÃO SIMULADA PARA SALVAR/ATUALIZAR UM PRODUTO ---
+const simulateSaveProductApi = async (updatedProduct: Product): Promise<boolean> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const index = mockProductsData.findIndex(p => p.id === updatedProduct.id);
+      if (index > -1) {
+        mockProductsData[index] = updatedProduct; // Atualiza o produto existente
+        console.log('simulateSaveProductApi: Produto atualizado na lista mockada:', updatedProduct);
+        resolve(true);
+      } else {
+        // Isso não deve acontecer para uma atualização de um produto existente,
+        // mas seria o caso de adicionar um novo.
+        console.log('simulateSaveProductApi: Produto não encontrado para atualização, adicionando como novo:', updatedProduct);
+        mockProductsData.push(updatedProduct);
+        resolve(true);
+      }
+    }, 500);
+  });
+};
 // --- FIM DOS DADOS MOCKADOS ---
 
 
@@ -52,70 +72,102 @@ export default function ProductEditScreen({ route, navigation }: ProductEditScre
   const [price, setPrice] = useState(initialProduct.price.toString().replace('.', ','));
 
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
-  const handleSave = () => {
-    Alert.alert('Sucesso', 'Produto atualizado com sucesso!');
-    navigation.goBack();
-  };
 
-  const handleDelete = () => {
-    setDeleteModalVisible(true);
-  };
+  const handleSave = async () => { // <--- AGORA É ASYNC
+    // Validação básica
+    if (name.trim() === '' || type.trim() === '' || price.trim() === '') {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+    const priceValue = parseFloat(price.replace(',', '.'));
+    if (isNaN(priceValue)) {
+      Alert.alert('Erro', 'Preço inválido.');
+      return;
+    }
 
-  const confirmDelete = async () => { // <--- AGORA É ASYNC
-    setDeleteModalVisible(false); // Fecha o modal imediatamente
+    const updatedProduct: Product = {
+      ...initialProduct, // Mantém o ID original
+      name,
+      type,
+      price: priceValue,
+      unit,
+    };
 
-    let success = false; // Variável para controlar o resultado da exclusão
+    let success = false;
 
     // --- CÓDIGO REAL (COM BACKEND) - COMENTADO ---
     /*
     try {
-      console.log(`Tentando excluir produto ${initialProduct.id} do backend...`);
-      const response = await fetch(`https://sua-api.com/produtos/${initialProduct.id}`, {
-        method: 'DELETE',
+      console.log(`Tentando atualizar produto ${updatedProduct.id} no backend...`);
+      const response = await fetch(`https://sua-api.com/produtos/${updatedProduct.id}`, {
+        method: 'PUT', // Geralmente PUT para atualização
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': `Bearer ${seuTokenDeAutenticacao}`, // Se precisar de autenticação
+          // 'Authorization': `Bearer ${seuTokenDeAutenticacao}`,
         },
+        body: JSON.stringify(updatedProduct),
       });
 
-      if (response.ok) { // Verifica se a resposta foi 2xx (sucesso)
-        console.log(`Produto ${initialProduct.name} excluído com sucesso do backend.`);
-        success = true; // Define success como true se a API retornar sucesso
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log('Produto atualizado com sucesso no backend:', responseData);
+        success = true;
       } else {
-        const errorData = await response.json(); // Tenta ler a mensagem de erro da API
-        console.error('Erro ao excluir produto no backend:', response.status, errorData);
-        success = false; // Define success como false em caso de erro da API
+        const errorData = await response.json();
+        console.error('Erro ao atualizar produto no backend:', response.status, errorData);
+        Alert.alert('Erro', `Não foi possível salvar as alterações: ${errorData.message || 'Tente novamente.'}`);
+        success = false;
       }
     } catch (error) {
-      console.error('Erro de rede ou na requisição de exclusão:', error);
-      success = false; // Define success como false em caso de erro de rede
+      console.error('Erro de rede ou na requisição de salvar:', error);
+      Alert.alert('Erro', 'Erro de conexão. Tente novamente.');
+      success = false;
     }
     */
     // --- FIM DO CÓDIGO REAL (COM BACKEND) - COMENTADO ---
 
     // --- CÓDIGO DE SIMULAÇÃO (ATIVO) ---
-    // Este bloco só é executado se o bloco de código real acima estiver comentado.
-    // Em um aplicativo real, você removeria este bloco e ativaria o código do backend.
     if (!success) { // Se o código real não foi executado ou falhou
-      success = await simulateDeleteProductApi(initialProduct.id);
+      success = await simulateSaveProductApi(updatedProduct);
     }
     // --- FIM DO CÓDIGO DE SIMULAÇÃO ---
 
 
-    if (success) { // 'success' virá da chamada da API real ou da simulação
-      console.log(`Produto ${initialProduct.name} excluído com sucesso!`);
+    if (success) {
+      setSuccessMessage('Produto atualizado com sucesso!');
+      setSuccessModalVisible(true);
+    } else {
+      console.log(`Falha ao salvar alterações no produto ${initialProduct.name}.`);
+    }
+  };
+
+  const handleAdvanceFromSuccessModal = () => {
+    setSuccessModalVisible(false);
+    navigation.goBack();
+  };
+
+
+  const handleDelete = () => {
+    setDeleteModalVisible(true);
+  };
+
+  const confirmDelete = async () => {
+    setDeleteModalVisible(false);
+
+    let success = false;
+
+    if (!success) {
+      success = await simulateDeleteProductApi(initialProduct.id);
+    }
+
+    if (success) {
       Alert.alert('Excluído', 'Produto excluído com sucesso!');
-      // 2. NAVEGA DE VOLTA E, O IDEAL, ATUALIZA A TELA ANTERIOR
-      // Em um app real, a tela anterior (ProductListScreen) precisaria recarregar seus dados.
-      // Isso pode ser feito via:
-      // - Um listener de foco (useFocusEffect do React Navigation) para recarregar dados da API
-      // - Um estado global (Context API, Redux, Zustand) onde a exclusão atualizaria a lista
-      // - Passando uma função de callback via params (menos comum para exclusão)
       navigation.goBack();
     } else {
       console.log(`Falha ao excluir produto ${initialProduct.name}.`);
-      Alert.alert('Erro', 'Não foi possível excluir o produto.');
     }
   };
 
@@ -172,6 +224,12 @@ export default function ProductEditScreen({ route, navigation }: ProductEditScre
         onCancel={cancelDelete}
         confirmButtonColor="#FF6347"
         confirmButtonTextColor="white"
+      />
+
+      <SuccessModal
+        isVisible={isSuccessModalVisible}
+        onAdvance={handleAdvanceFromSuccessModal}
+        message={successMessage}
       />
     </View>
   );
