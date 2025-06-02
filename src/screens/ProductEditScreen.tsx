@@ -1,51 +1,53 @@
+// src/screens/ProductEditScreen.tsx
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-// MUITO IMPORTANTE: Mude para StackScreenProps do '@react-navigation/stack'
 import { StackScreenProps } from '@react-navigation/stack';
 
-// Importe ProductStackParamList do arquivo onde ela foi definida e exportada
-import { ProductStackParamList } from '../navigation/ProductStack'; // <--- VERIFIQUE ESTE CAMINHO
+// Importar a lista de parâmetros do ProductStack
+import { ProductStackParamList } from '../navigation/ProductStack'; // Ajuste o caminho se necessário
 
-// Defina o tipo das props do componente de tela usando StackScreenProps
-// O primeiro argumento é a sua ProductStackParamList, o segundo é o nome da rota específica
+// IMPORTAR O NOVO COMPONENTE ConfirmationModal
+import ConfirmationModal from '../components/ConfirmationModal'; // <--- NOVO
+
+// Definir o tipo das props para esta tela
 type ProductEditScreenProps = StackScreenProps<ProductStackParamList, 'EditProduct'>;
 
-// O componente agora recebe 'route' e 'navigation' diretamente como props.
-// O hook useNavigation() é REMOVIDO daqui.
 export default function ProductEditScreen({ route, navigation }: ProductEditScreenProps) {
-  // const navigation = useNavigation(); // <--- REMOVA ESTA LINHA
+  const { product: initialProduct } = route.params;
 
-  const { product } = route.params;
+  const [unit, setUnit] = useState<'Kg' | 'Unid.'>(initialProduct.unit === 'Kg' ? 'Kg' : 'Unid.');
+  const [name, setName] = useState(initialProduct.name);
+  const [type, setType] = useState(initialProduct.type);
+  const [price, setPrice] = useState(initialProduct.price.toString().replace('.', ','));
 
-  const [unit, setUnit] = useState<'Kg' | 'Unid.'>(product.unit === 'Kg' ? 'Kg' : 'Unid.');
-  const [name, setName] = useState(product.name);
-  const [type, setType] = useState(product.type);
-  const [price, setPrice] = useState(product.price.toString().replace('.', ','));
+  // ESTADO PARA CONTROLAR A VISIBILIDADE DO MODAL DE EXCLUSÃO
+  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false); // <--- NOVO
 
   const handleSave = () => {
-    // Aqui você faria a lógica para salvar as alterações do produto
-    Alert.alert('Sucesso', 'Produto atualizado com sucesso!');
+    // Lógica para salvar as alterações do produto
+    Alert.alert('Sucesso', 'Produto atualizado com sucesso!'); // Este Alert ainda pode não ser visível no Canvas
     navigation.goBack();
   };
 
+  // FUNÇÃO PARA ABRIR O MODAL DE CONFIRMAÇÃO DE EXCLUSÃO
   const handleDelete = () => {
-    Alert.alert(
-      'Excluir Produto',
-      'Tem certeza que deseja excluir este produto?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: () => {
-            // Aqui você faria a lógica para excluir o produto
-            Alert.alert('Excluído', 'Produto excluído com sucesso!');
-            navigation.goBack();
-          },
-        },
-      ]
-    );
+    setDeleteModalVisible(true); // <--- SUBSTITUI Alert.alert
+  };
+
+  // FUNÇÃO PARA CONFIRMAR A EXCLUSÃO (chamada pelo modal)
+  const confirmDelete = () => {
+    setDeleteModalVisible(false); // Fecha o modal
+    // --- SUA LÓGICA REAL DE EXCLUSÃO DE PRODUTO AQUI ---
+    console.log(`Produto ${initialProduct.name} excluído!`);
+    // Alert.alert('Excluído', 'Produto excluído com sucesso!'); // Este Alert ainda pode não ser visível no Canvas
+    navigation.goBack(); // Volta para a tela anterior
+  };
+
+  // FUNÇÃO PARA CANCELAR A EXCLUSÃO (chamada pelo modal)
+  const cancelDelete = () => {
+    setDeleteModalVisible(false); // Fecha o modal
+    console.log('Exclusão cancelada.');
   };
 
   return (
@@ -85,6 +87,19 @@ export default function ProductEditScreen({ route, navigation }: ProductEditScre
       <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
         <Text style={styles.deleteButtonText}>Excluir Produto</Text>
       </TouchableOpacity>
+
+      {/* RENDERIZAR O ConfirmationModal PARA EXCLUSÃO */}
+      <ConfirmationModal
+        isVisible={isDeleteModalVisible}
+        title="Excluir Produto"
+        message={`Tem certeza que deseja excluir "${initialProduct.name}"?`}
+        confirmText="Sim, Excluir"
+        cancelText="Não"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+        confirmButtonColor="#FF6347" // Cor vermelha para exclusão
+        confirmButtonTextColor="white"
+      />
     </View>
   );
 }
@@ -163,7 +178,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   deleteButton: {
-    backgroundColor: '#FF6347',
+    backgroundColor: '#FF6347', // Um tom de vermelho para o botão de excluir
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',

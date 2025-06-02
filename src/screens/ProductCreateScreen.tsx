@@ -1,56 +1,78 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { StackScreenProps } from '@react-navigation/stack';
+import { ProductStackParamList } from '../navigation/ProductStack';
 
-export default function ProductCreateScreen() {
-  const navigation = useNavigation();
-  const [unit, setUnit] = useState<'Kg' | 'Unid.'>('Kg');
+import SuccessModal from '../components/SuccessModal';
+
+type ProductCreateScreenProps = StackScreenProps<ProductStackParamList, 'CreateProduct'>;
+
+export default function ProductCreateScreen({ navigation }: ProductCreateScreenProps) {
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [price, setPrice] = useState('');
+  const [unit, setUnit] = useState<'Kg' | 'Unid.'>('Kg');
 
-  const handleAdd = () => {
-    // Aqui você faria a lógica para adicionar o produto (API, Context, etc)
-    Alert.alert('Sucesso', 'Produto adicionado com sucesso!');
-    navigation.goBack();
+  const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleAddProduct = () => {
+    setErrorMessage('');
+
+    // --- REMOVIDO/COMENTADO: Lógica de validação de campos vazios ---
+    // if (name.trim() === '' || type.trim() === '' || price.trim() === '') {
+    //   setErrorMessage('Por favor, preencha todos os campos obrigatórios.');
+    //   return;
+    // }
+
+    console.log('handleAddProduct: Tentando mostrar modal de sucesso (validação ignorada).');
+    setSuccessModalVisible(true);
+    console.log('handleAddProduct: isSuccessModalVisible definido para true.');
   };
 
   const handleCancel = () => {
     navigation.goBack();
   };
 
+  const handleAdvanceFromSuccessModal = () => {
+    console.log('handleAdvanceFromSuccessModal: Botão Avançar clicado. Escondendo modal.');
+    setSuccessModalVisible(false);
+    navigation.navigate('ProductList');
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Novo Produto</Text>
-      <View style={styles.imagePicker}>
-        <Ionicons name="camera" size={40} color="#222" />
-      </View>
+
+      <TouchableOpacity style={styles.imagePicker}>
+        <Ionicons name="camera" size={40} color="#888" />
+      </TouchableOpacity>
+
       <Text style={styles.label}>Produto:</Text>
       <TextInput
         style={styles.input}
         value={name}
-        onChangeText={setName}
-        placeholder="Nome do produto"
-        placeholderTextColor="#888"
+        onChangeText={(text) => { setName(text); setErrorMessage(''); }}
+        placeholder="Banana"
       />
+
       <Text style={styles.label}>Tipo:</Text>
       <TextInput
         style={styles.input}
         value={type}
-        onChangeText={setType}
-        placeholder="Tipo do produto"
-        placeholderTextColor="#888"
+        onChangeText={(text) => { setType(text); setErrorMessage(''); }}
+        placeholder="Fruta"
       />
+
       <Text style={styles.label}>Preço:</Text>
       <View style={styles.priceRow}>
         <TextInput
-          style={[styles.input, { flex: 1, marginRight: 8 }]}
+          style={[styles.input, styles.priceInput]}
           value={price}
-          onChangeText={setPrice}
+          onChangeText={(text) => { setPrice(text); setErrorMessage(''); }}
           keyboardType="numeric"
-          placeholder="Preço"
-          placeholderTextColor="#888"
+          placeholder="5,90"
         />
         <TouchableOpacity
           style={[styles.unitButton, unit === 'Kg' && styles.unitButtonActive]}
@@ -65,12 +87,28 @@ export default function ProductCreateScreen() {
           <Text style={[styles.unitButtonText, unit === 'Unid.' && styles.unitButtonTextActive]}>Unid.</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
+
+      {errorMessage ? <Text style={styles.errorMessage}>{errorMessage}</Text> : null}
+
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={handleAddProduct}
+      >
         <Text style={styles.addButtonText}>Adicionar Produto</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+
+      <TouchableOpacity
+        style={styles.cancelButton}
+        onPress={handleCancel}
+      >
         <Text style={styles.cancelButtonText}>Cancelar</Text>
       </TouchableOpacity>
+
+      <SuccessModal
+        isVisible={isSuccessModalVisible}
+        onAdvance={handleAdvanceFromSuccessModal}
+        message="Produto Adicionado com Sucesso!"
+      />
     </View>
   );
 }
@@ -86,14 +124,14 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '600',
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 24,
   },
   imagePicker: {
     alignSelf: 'center',
-    backgroundColor: '#ddd',
-    borderRadius: 8,
-    width: '100%',
-    height: 100,
+    backgroundColor: '#f2f2f2',
+    borderRadius: 16,
+    width: 80,
+    height: 80,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
@@ -102,35 +140,38 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontSize: 15,
     marginBottom: 4,
-    marginTop: 8,
+    marginTop: 12,
   },
   input: {
-    backgroundColor: '#ddd',
+    backgroundColor: '#f2f2f2',
     borderRadius: 8,
     paddingHorizontal: 12,
     height: 40,
     fontSize: 15,
-    marginBottom: 8,
   },
   priceRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
   },
+  priceInput: {
+    flex: 1,
+    marginRight: 8,
+  },
   unitButton: {
     borderWidth: 1,
-    borderColor: '#19C37D',
+    borderColor: '#007AFF',
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginLeft: 4,
-    backgroundColor: '#ddd',
+    backgroundColor: '#fff',
   },
   unitButtonActive: {
-    backgroundColor: '#19C3FF',
+    backgroundColor: '#007AFF',
   },
   unitButtonText: {
-    color: '#19C37D',
+    color: '#007AFF',
     fontWeight: '600',
   },
   unitButtonTextActive: {
@@ -141,7 +182,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 20,
+    width: '100%',
   },
   addButtonText: {
     color: '#fff',
@@ -149,16 +191,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   cancelButton: {
-    borderColor: '#FF3B30',
-    borderWidth: 1.5,
+    backgroundColor: 'transparent',
+    borderColor: '#FF6347',
+    borderWidth: 1,
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 10,
+    width: '100%',
   },
   cancelButtonText: {
-    color: '#FF3B30',
+    color: '#FF6347',
     fontWeight: '600',
     fontSize: 16,
   },
-}); 
+  errorMessage: {
+    color: 'red',
+    fontSize: 14,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+});
