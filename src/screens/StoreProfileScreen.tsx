@@ -1,5 +1,5 @@
 // src/screens/StoreProfileScreen.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
@@ -12,13 +12,12 @@ import { StoreProfile, StoreAddress, PaymentMethods } from '../types/profile';
 import ExitConfirmationModal from '../components/ExitConfirmationModal';
 
 // --- DADOS MOCKADOS (SIMULANDO UM BANCO DE DADOS/API) ---
-// AGORA EXPORTAMOS E USAMOS 'let' para que possam ser modificados e importados
 export let mockStoreProfile: StoreProfile = {
   id: 'store-123',
   name: 'Hortifruti Gostinho Bom',
   email: 'hortifrutigostinhobom.com.br',
   phone: '(XX) XXXX-XXXX',
-  status: 'Aberto',
+  status: 'Aberto', // O status inicial pode ser definido aqui, mas será atualizado
   openingHours: {
     from: '09:00',
     to: '17:00',
@@ -44,22 +43,78 @@ export let mockPaymentMethods: PaymentMethods = {
 
 type StoreProfileScreenProps = StackScreenProps<ProfileStackParamList, 'StoreProfile'>;
 
+const getStoreStatus = (openingHours: { from: string; to: string }): 'Aberto' | 'Fechado' | 'Em Férias' => {
+  console.log('getStoreStatus: Horário de funcionamento recebido:', openingHours);
+
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+
+  console.log(`getStoreStatus: Horário atual do dispositivo: ${currentHour}:${currentMinute}`);
+
+  const [openHour, openMinute] = openingHours.from.split(':').map(Number);
+  const [closeHour, closeMinute] = openingHours.to.split(':').map(Number);
+
+  console.log(`getStoreStatus: Horário de abertura parseado: ${openHour}:${openMinute}`);
+  console.log(`getStoreStatus: Horário de fechamento parseado: ${closeHour}:${closeMinute}`);
+
+
+  const currentTimeInMinutes = currentHour * 60 + currentMinute;
+  const openTimeInMinutes = openHour * 60 + openMinute;
+  const closeTimeInMinutes = closeHour * 60 + closeMinute;
+
+  console.log(`getStoreStatus: Tempo atual em minutos: ${currentTimeInMinutes}`);
+  console.log(`getStoreStatus: Tempo de abertura em minutos: ${openTimeInMinutes}`);
+  console.log(`getStoreStatus: Tempo de fechamento em minutos: ${closeTimeInMinutes}`);
+
+
+  // Ajuste para lidar com horários de fechamento no dia seguinte (ex: abre 22h, fecha 04h)
+  if (openTimeInMinutes > closeTimeInMinutes) {
+    if (currentTimeInMinutes >= openTimeInMinutes || currentTimeInMinutes <= closeTimeInMinutes) {
+      console.log('getStoreStatus: Retornando: Aberto (passa meia-noite)');
+      return 'Aberto';
+    } else {
+      console.log('getStoreStatus: Retornando: Fechado (passa meia-noite)');
+      return 'Fechado';
+    }
+  } else {
+    if (currentTimeInMinutes >= openTimeInMinutes && currentTimeInMinutes <= closeTimeInMinutes) {
+      console.log('getStoreStatus: Retornando: Aberto');
+      return 'Aberto';
+    } else {
+      console.log('getStoreStatus: Retornando: Fechado');
+      return 'Fechado';
+    }
+  }
+};
+
+
 export default function StoreProfileScreen({ navigation }: StoreProfileScreenProps) {
-  // Use estados locais para os dados do perfil, endereço e métodos de pagamento
-  // Eles serão atualizados via useFocusEffect
   const [profileData, setProfileData] = useState<StoreProfile>(mockStoreProfile);
   const [addressData, setAddressData] = useState<StoreAddress>(mockStoreAddress);
   const [paymentMethodsData, setPaymentMethodsData] = useState<PaymentMethods>(mockPaymentMethods);
 
-  // Use useFocusEffect para recarregar os dados sempre que a tela for focada
   useFocusEffect(
     useCallback(() => {
-      // Crie uma NOVA instância de objeto a partir dos dados globais mutáveis
-      setProfileData({ ...mockStoreProfile }); // <--- CHAVE DA CORREÇÃO: Usar spread para criar nova referência
-      setAddressData({ ...mockStoreAddress }); // <--- CHAVE DA CORREÇÃO: Usar spread para criar nova referência
-      setPaymentMethodsData({ ...mockPaymentMethods }); // Já estava correto, mas mantendo o padrão
+      console.log('StoreProfileScreen: useFocusEffect acionado.'); // <--- CONSOLE.LOG
+      console.log('StoreProfileScreen: mockStoreProfile.openingHours no foco:', mockStoreProfile.openingHours); // <--- CONSOLE.LOG
+
+      const currentCalculatedStatus = getStoreStatus(mockStoreProfile.openingHours);
+      setProfileData({ ...mockStoreProfile, status: currentCalculatedStatus });
+      setAddressData({ ...mockStoreAddress });
+      setPaymentMethodsData({ ...mockPaymentMethods });
+
+      const intervalId = setInterval(() => {
+        console.log('StoreProfileScreen: setInterval - mockStoreProfile.openingHours:', mockStoreProfile.openingHours); // <--- CONSOLE.LOG
+        const updatedStatus = getStoreStatus(mockStoreProfile.openingHours);
+        if (updatedStatus !== mockStoreProfile.status) {
+          mockStoreProfile.status = updatedStatus;
+          setProfileData({ ...mockStoreProfile });
+        }
+      }, 60 * 1000); // A cada 1 minuto
+
       return () => {
-        // Opcional: Lógica de limpeza quando a tela perde o foco
+        clearInterval(intervalId);
       };
     }, [])
   );
@@ -90,7 +145,14 @@ export default function StoreProfileScreen({ navigation }: StoreProfileScreenPro
           <Ionicons name="camera" size={40} color="#888" />
         </View>
         <Text style={styles.storeName}>{profileData.name}</Text>
-        <Text style={styles.storeStatus}>Status: {profileData.status}</Text>
+        <Text style={[
+            styles.storeStatus,
+            profileData.status === 'Fechado' && styles.statusClosed,
+            profileData.status === 'Em Férias' && styles.statusVacation,
+          ]}
+        >
+          Status: {profileData.status}
+        </Text>
       </View>
 
       <TouchableOpacity
@@ -175,6 +237,12 @@ const styles = StyleSheet.create({
     color: '#19C37D',
     fontWeight: '500',
     marginTop: 4,
+  },
+  statusClosed: {
+    color: '#FF6347',
+  },
+  statusVacation: {
+    color: '#FFA500',
   },
   menuItem: {
     flexDirection: 'row',
