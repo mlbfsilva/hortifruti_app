@@ -1,14 +1,15 @@
 // src/screens/StoreProfileScreen.tsx
-import React from 'react';
+import React, { useState } from 'react'; // Importe useState
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
 
-// Importar a lista de parâmetros do ProfileStack
-import { ProfileStackParamList } from '../navigation/ProfileStack'; // Ajuste o caminho se necessário
+// Importar os tipos de perfil e a lista de parâmetros do ProfileStack
+import { ProfileStackParamList } from '../navigation/ProfileStack';
+import { StoreProfile, StoreAddress, PaymentMethods } from '../types/profile';
 
-// IMPORTAR OS TIPOS DE PERFIL DIRETAMENTE DE 'src/types/profile.ts'
-import { StoreProfile, StoreAddress, PaymentMethods } from '../types/profile'; // <--- CORREÇÃO AQUI
+// 1. IMPORTAR O COMPONENTE ExitConfirmationModal
+import ExitConfirmationModal from '../components/ExitConfirmationModal'; // Verifique o caminho
 
 // Definir o tipo das props para esta tela, usando ProfileStackParamList
 type StoreProfileScreenProps = StackScreenProps<ProfileStackParamList, 'StoreProfile'>;
@@ -42,11 +43,32 @@ const mockPaymentMethods: PaymentMethods = {
 };
 
 export default function StoreProfileScreen({ navigation }: StoreProfileScreenProps) {
-  // Para fins de demonstração, estamos usando dados mockados.
-  // Em um aplicativo real, você carregaria esses dados de um estado global ou API.
   const profile = mockStoreProfile;
   const address = mockStoreAddress;
   const paymentMethods = mockPaymentMethods;
+
+  // 2. GERENCIAR A VISIBILIDADE DO MODAL DE SAÍDA COM useState
+  const [isExitModalVisible, setExitModalVisible] = useState(false);
+
+  // Função para abrir o modal de confirmação de saída
+  const handleLogout = () => {
+    setExitModalVisible(true);
+  };
+
+  // Função para confirmar a saída (executada ao clicar "Sim, quero sair")
+  const confirmLogout = () => {
+    setExitModalVisible(false); // Fecha o modal
+    // --- SUA LÓGICA REAL DE SAÍDA DA CONTA AQUI ---
+    console.log('Usuário confirmou a saída da conta!');
+    // Exemplo: navigation.navigate('LoginScreen'); ou limpar tokens de autenticação
+    // Alert.alert('Saindo', 'Você foi desconectado.'); // Pode usar um Alert ou outro modal de sucesso
+  };
+
+  // Função para cancelar a saída (executada ao clicar "Não")
+  const cancelLogout = () => {
+    setExitModalVisible(false); // Fecha o modal
+    console.log('Saída cancelada.');
+  };
 
   return (
     <View style={styles.container}>
@@ -84,11 +106,18 @@ export default function StoreProfileScreen({ navigation }: StoreProfileScreenPro
         <Ionicons name="chevron-forward" size={24} color="#888" />
       </TouchableOpacity>
 
-      {/* Adicione outras opções de menu aqui, como "Promoções" ou "Sair" */}
-      <TouchableOpacity style={[styles.menuItem, styles.logoutButton]}>
+      {/* Botão "Sair" que agora chama o modal de confirmação */}
+      <TouchableOpacity style={[styles.menuItem, styles.logoutButton]} onPress={handleLogout}>
         <Text style={[styles.menuItemText, styles.logoutButtonText]}>Sair</Text>
         <Ionicons name="log-out-outline" size={24} color="#FF6347" />
       </TouchableOpacity>
+
+      {/* 3. RENDERIZAR O COMPONENTE ExitConfirmationModal */}
+      <ExitConfirmationModal
+        isVisible={isExitModalVisible}
+        onConfirm={confirmLogout}
+        onCancel={cancelLogout}
+      />
     </View>
   );
 }
