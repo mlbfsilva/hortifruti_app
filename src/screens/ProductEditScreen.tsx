@@ -2,16 +2,46 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { StackScreenProps } from '@react-navigation/stack';
+import { StackScreenProps } from '@react-navigation/stack'; // Importe StackScreenProps
 
-// Importar a lista de parâmetros do ProductStack
-import { ProductStackParamList } from '../navigation/ProductStack'; // Ajuste o caminho se necessário
+import { ProductStackParamList } from '../navigation/ProductStack'; // Importe ProductStackParamList
+import ConfirmationModal from '../components/ConfirmationModal';
 
-// IMPORTAR O NOVO COMPONENTE ConfirmationModal
-import ConfirmationModal from '../components/ConfirmationModal'; // <--- NOVO
+// Importe o tipo Product
+import { Product } from '../types/product';
 
-// Definir o tipo das props para esta tela
+// --- NOVO: Definição do tipo das props para esta tela ---
 type ProductEditScreenProps = StackScreenProps<ProductStackParamList, 'EditProduct'>;
+// --- FIM DO NOVO ---
+
+// --- DADOS MOCKADOS (SIMULANDO UM BANCO DE DADOS/API) ---
+// Em um aplicativo real, esta lista viria de um estado global ou de uma API.
+// Para este exemplo, vamos simular a remoção daqui.
+export let mockProductsData: Product[] = [ // <--- 'export' é necessário para ProductListScreen
+  { id: '1', name: 'Banana', type: 'Fruta', price: 5.9, unit: 'Kg' },
+  { id: '2', name: 'Maçã', type: 'Fruta', price: 6.5, unit: 'Kg' },
+  { id: '3', name: 'Alface', type: 'Verdura', price: 3.2, unit: 'Unid.' },
+  { id: '4', name: 'Tomate', type: 'Fruta', price: 4.8, unit: 'Kg' },
+];
+
+// Função simulada para remover um produto (simula uma chamada de API)
+const simulateDeleteProductApi = async (productId: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    setTimeout(() => { // Simula um atraso de rede
+      const initialLength = mockProductsData.length;
+      mockProductsData = mockProductsData.filter(p => p.id !== productId);
+      if (mockProductsData.length < initialLength) {
+        console.log(`Produto ${productId} removido da lista mockada.`);
+        resolve(true); // Sucesso
+      } else {
+        console.log(`Produto ${productId} não encontrado na lista mockada.`);
+        resolve(false); // Falha (não encontrado)
+      }
+    }, 500); // 0.5 segundos de atraso
+  });
+};
+// --- FIM DOS DADOS MOCKADOS ---
+
 
 export default function ProductEditScreen({ route, navigation }: ProductEditScreenProps) {
   const { product: initialProduct } = route.params;
@@ -21,32 +51,76 @@ export default function ProductEditScreen({ route, navigation }: ProductEditScre
   const [type, setType] = useState(initialProduct.type);
   const [price, setPrice] = useState(initialProduct.price.toString().replace('.', ','));
 
-  // ESTADO PARA CONTROLAR A VISIBILIDADE DO MODAL DE EXCLUSÃO
-  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false); // <--- NOVO
+  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
 
   const handleSave = () => {
-    // Lógica para salvar as alterações do produto
-    Alert.alert('Sucesso', 'Produto atualizado com sucesso!'); // Este Alert ainda pode não ser visível no Canvas
+    Alert.alert('Sucesso', 'Produto atualizado com sucesso!');
     navigation.goBack();
   };
 
-  // FUNÇÃO PARA ABRIR O MODAL DE CONFIRMAÇÃO DE EXCLUSÃO
   const handleDelete = () => {
-    setDeleteModalVisible(true); // <--- SUBSTITUI Alert.alert
+    setDeleteModalVisible(true);
   };
 
-  // FUNÇÃO PARA CONFIRMAR A EXCLUSÃO (chamada pelo modal)
-  const confirmDelete = () => {
-    setDeleteModalVisible(false); // Fecha o modal
-    // --- SUA LÓGICA REAL DE EXCLUSÃO DE PRODUTO AQUI ---
-    console.log(`Produto ${initialProduct.name} excluído!`);
-    // Alert.alert('Excluído', 'Produto excluído com sucesso!'); // Este Alert ainda pode não ser visível no Canvas
-    navigation.goBack(); // Volta para a tela anterior
+  const confirmDelete = async () => { // <--- AGORA É ASYNC
+    setDeleteModalVisible(false); // Fecha o modal imediatamente
+
+    let success = false; // Variável para controlar o resultado da exclusão
+
+    // --- CÓDIGO REAL (COM BACKEND) - COMENTADO ---
+    /*
+    try {
+      console.log(`Tentando excluir produto ${initialProduct.id} do backend...`);
+      const response = await fetch(`https://sua-api.com/produtos/${initialProduct.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          // 'Authorization': `Bearer ${seuTokenDeAutenticacao}`, // Se precisar de autenticação
+        },
+      });
+
+      if (response.ok) { // Verifica se a resposta foi 2xx (sucesso)
+        console.log(`Produto ${initialProduct.name} excluído com sucesso do backend.`);
+        success = true; // Define success como true se a API retornar sucesso
+      } else {
+        const errorData = await response.json(); // Tenta ler a mensagem de erro da API
+        console.error('Erro ao excluir produto no backend:', response.status, errorData);
+        success = false; // Define success como false em caso de erro da API
+      }
+    } catch (error) {
+      console.error('Erro de rede ou na requisição de exclusão:', error);
+      success = false; // Define success como false em caso de erro de rede
+    }
+    */
+    // --- FIM DO CÓDIGO REAL (COM BACKEND) - COMENTADO ---
+
+    // --- CÓDIGO DE SIMULAÇÃO (ATIVO) ---
+    // Este bloco só é executado se o bloco de código real acima estiver comentado.
+    // Em um aplicativo real, você removeria este bloco e ativaria o código do backend.
+    if (!success) { // Se o código real não foi executado ou falhou
+      success = await simulateDeleteProductApi(initialProduct.id);
+    }
+    // --- FIM DO CÓDIGO DE SIMULAÇÃO ---
+
+
+    if (success) { // 'success' virá da chamada da API real ou da simulação
+      console.log(`Produto ${initialProduct.name} excluído com sucesso!`);
+      Alert.alert('Excluído', 'Produto excluído com sucesso!');
+      // 2. NAVEGA DE VOLTA E, O IDEAL, ATUALIZA A TELA ANTERIOR
+      // Em um app real, a tela anterior (ProductListScreen) precisaria recarregar seus dados.
+      // Isso pode ser feito via:
+      // - Um listener de foco (useFocusEffect do React Navigation) para recarregar dados da API
+      // - Um estado global (Context API, Redux, Zustand) onde a exclusão atualizaria a lista
+      // - Passando uma função de callback via params (menos comum para exclusão)
+      navigation.goBack();
+    } else {
+      console.log(`Falha ao excluir produto ${initialProduct.name}.`);
+      Alert.alert('Erro', 'Não foi possível excluir o produto.');
+    }
   };
 
-  // FUNÇÃO PARA CANCELAR A EXCLUSÃO (chamada pelo modal)
   const cancelDelete = () => {
-    setDeleteModalVisible(false); // Fecha o modal
+    setDeleteModalVisible(false);
     console.log('Exclusão cancelada.');
   };
 
@@ -88,7 +162,6 @@ export default function ProductEditScreen({ route, navigation }: ProductEditScre
         <Text style={styles.deleteButtonText}>Excluir Produto</Text>
       </TouchableOpacity>
 
-      {/* RENDERIZAR O ConfirmationModal PARA EXCLUSÃO */}
       <ConfirmationModal
         isVisible={isDeleteModalVisible}
         title="Excluir Produto"
@@ -97,7 +170,7 @@ export default function ProductEditScreen({ route, navigation }: ProductEditScre
         cancelText="Não"
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
-        confirmButtonColor="#FF6347" // Cor vermelha para exclusão
+        confirmButtonColor="#FF6347"
         confirmButtonTextColor="white"
       />
     </View>
@@ -178,7 +251,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   deleteButton: {
-    backgroundColor: '#FF6347', // Um tom de vermelho para o botão de excluir
+    backgroundColor: '#FF6347',
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
@@ -186,7 +259,7 @@ const styles = StyleSheet.create({
   },
   deleteButtonText: {
     color: '#fff',
-    fontSize: 16,
     fontWeight: '600',
+    fontSize: 16,
   },
 });

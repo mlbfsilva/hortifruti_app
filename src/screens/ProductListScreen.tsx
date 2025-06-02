@@ -2,31 +2,21 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useFocusEffect } from '@react-navigation/native'; // <--- IMPORTAR useFocusEffect
+import { useCallback } from 'react'; // <--- IMPORTAR useCallback
 
-const mockProducts = [
-  { id: '1', name: 'Banana', type: 'Fruta', price: 5.9, unit: 'Kg' },
-  { id: '2', name: 'Maçã', type: 'Fruta', price: 6.5, unit: 'Kg' },
-  { id: '3', name: 'Alface', type: 'Verdura', price: 3.2, unit: 'Unidade' },
-  { id: '4', name: 'Tomate', type: 'Fruta', price: 4.8, unit: 'Kg' },
-];
+import { ProductStackParamList } from '../navigation/ProductStack';
+import { Product } from '../types/product'; // Importe o tipo Product
 
-// Defina o tipo das rotas do seu stack
-type RootStackParamList = {
-  ProductList: undefined;
-  EditProduct: { product: {
-    id: string;
-    name: string;
-    type: string;
-    price: number;
-    unit: 'Kg' | 'Unid.' | string;
-  }};
-  CreateProduct: undefined;
-  // ... outras rotas se necessário
-};
+// --- DADOS MOCKADOS (IMPORTAR DE ProductEditScreen.tsx) ---
+// Para que a exclusão funcione, ProductListScreen precisa acessar a mesma lista.
+// Em um cenário real, você buscaria isso de um backend ou estado global.
+// Por enquanto, vamos importar a lista mockada que está sendo modificada.
+import { mockProductsData as globalMockProductsData } from './ProductEditScreen'; // <--- IMPORTAR A LISTA MOCKADA
 
 // Defina o tipo do navigation para esta tela
 type ProductListScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
+  ProductStackParamList,
   'ProductList'
 >;
 
@@ -36,9 +26,21 @@ type Props = {
 
 export default function ProductListScreen({ navigation }: Props) {
   const [search, setSearch] = useState('');
+  const [products, setProducts] = useState<Product[]>([]); // <--- NOVO: Estado para a lista de produtos
+
+  // Use useFocusEffect para recarregar os dados sempre que a tela for focada
+  useFocusEffect(
+    useCallback(() => {
+      // Quando a tela é focada, atualize a lista de produtos com os dados globais mockados
+      setProducts(globalMockProductsData); // <--- ATUALIZA O ESTADO COM OS DADOS GLOBAIS
+      return () => {
+        // Opcional: Lógica de limpeza quando a tela perde o foco
+      };
+    }, [])
+  );
 
   // Filtra os produtos conforme o texto digitado
-  const filteredProducts = mockProducts.filter(product =>
+  const filteredProducts = products.filter(product => // <--- USAR O ESTADO 'products'
     product.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -145,4 +147,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
-}); 
+});
