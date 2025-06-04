@@ -1,22 +1,14 @@
 import React, { useState } from "react";
 import {StyleSheet, View, Text, Alert, Pressable, TouchableOpacity, ScrollView,} from "react-native";
 import { router } from "expo-router";
-import AnimatedCheckbox from "react-native-checkbox-reanimated";
+
 
 export default function criarContaParceirosAnalise() {
   const [check, setCheck] = useState<boolean>(false);
 
   const handleConfirmar = () => {
-    if (!check) {
-      Alert.alert(
-        "Atenção",
-        "Para concluir o cadastro, é necessário confirmar que está ciente em relação ao processo de cadastro para os parceiros.",
-        [{ text: "OK" }]
-      );
-      return;
-    }
-
     router.push("./algumlugar");
+
   };
 
   return (
@@ -30,19 +22,6 @@ export default function criarContaParceirosAnalise() {
           Aguarde a conclusão do cadastro para poder utilizar o aplicativo como parceiro
         </Text>
 
-        <View style={styles.ladocontainer}>
-          <Pressable onPress={() => setCheck(!check)} style={styles.checkbox}>
-            <AnimatedCheckbox
-              checked={check}
-              highlightColor="#1DFF3F"
-              checkmarkColor="#ffffff"
-              boxOutlineColor="#1DFF3F"
-            />
-          </Pressable>
-          <Text style={styles.checkboxLabel}>
-            Marque a opção para confirmar ciência do processo de cadastro para parceiros
-          </Text>
-        </View>
 
         <TouchableOpacity style={styles.confimButton} onPress={handleConfirmar}>
           <Text style={styles.confirmButtonText}>Próximo</Text>
@@ -88,13 +67,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginHorizontal: 14,
     marginTop: 12,
-    textAlign: "center",
+    alignItems: 'center',
+    fontWeight: 'bold',
   },
   infoPage: {
     marginTop: 24,
     fontSize: 16,
     color: "#000",
     textAlign: "center",
+    alignItems: 'center',
   },
   ladocontainer: {
     flexDirection: "row",
