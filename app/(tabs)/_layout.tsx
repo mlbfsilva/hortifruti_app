@@ -1,32 +1,70 @@
-import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import React from 'react';
+import Entypo from '@expo/vector-icons/Entypo';
+import { Link, Tabs } from 'expo-router';
+import { Pressable } from 'react-native';
+
+import Colors from '@/constants/Colors';
+import { useColorScheme } from '@/components/useColorScheme';
+import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+
+function TabBarIcon(props: {
+  name: React.ComponentProps<typeof Entypo>['name'];
+  color: string;
+}) {
+  return <Entypo size={28} style={{ marginBottom: -3 }} {...props} />;
+}
 
 export default function TabLayout() {
+  const colorScheme = useColorScheme();
+
   return (
-    <Tabs screenOptions={{
-      tabBarActiveTintColor: '#2196F3',
-      tabBarInactiveTintColor: '#666',
-    }}>
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        headerShown: useClientOnlyValue(false, true),
+      }}>
       <Tabs.Screen
-        name="pedidos"
+        name="index"
         options={{
-          title: 'Pedidos',
-          tabBarIcon: ({ color }) => (
-            <FontAwesome5 name="clipboard-list" size={24} color={color} />
+          title: 'Início',
+          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+          headerRight: () => (
+            <Link href="/modal" asChild>
+              <Pressable>
+                {({ pressed }) => (
+                  <Entypo
+                    name="info-with-circle"
+                    size={25}
+                    color={Colors[colorScheme ?? 'light'].text}
+                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
+                  />
+                )}
+              </Pressable>
+            </Link>
           ),
-          headerShown: false,
         }}
       />
       <Tabs.Screen
-        name="dashboard"
+        name="buscar"
         options={{
-          title: 'Dashboard',
-          tabBarIcon: ({ color }) => (
-            <MaterialIcons name="dashboard" size={24} color={color} />
-          ),
-          headerShown: false,
+          title: 'Buscar',
+          tabBarIcon: ({ color }) => <TabBarIcon name="magnifying-glass" size={20} color={color} />,
+        }}
+      />
+        <Tabs.Screen
+        name="pedidos"
+        options={{
+          title: 'Pedidos',
+          tabBarIcon: ({ color }) => <TabBarIcon name="clipboard" size={20} color={color} />,
+        }}
+      />
+        <Tabs.Screen
+        name="perfil"
+        options={{
+          title: 'Perfil',
+          tabBarIcon: ({ color }) => <TabBarIcon name="user" size={24} color={color} />,
         }}
       />
     </Tabs>
   );
-} 
+}
