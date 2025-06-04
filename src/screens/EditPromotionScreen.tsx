@@ -1,6 +1,6 @@
 // src/screens/EditPromotionScreen.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { StackScreenProps } from '@react-navigation/stack';
 
@@ -68,19 +68,23 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
   const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
 
   const handleSave = async () => {
     console.log('handleSave: Botão Salvar Alterações clicado.'); // <--- CONSOLE.LOG
+    setErrorMessage(''); // Limpa qualquer erro anterior
+
     if (productName.trim() === '' || productType.trim() === '' || promotionPrice.trim() === '') {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
+      setErrorMessage('Por favor, preencha todos os campos obrigatórios.');
       console.log('handleSave: Validação falhou - campos vazios.'); // <--- CONSOLE.LOG
       return;
     }
 
     const priceValue = parseFloat(promotionPrice.replace(',', '.'));
     if (isNaN(priceValue)) {
-      Alert.alert('Erro', 'Preço da promoção inválido.');
+      setErrorMessage('Preço da promoção inválido.');
       console.log('handleSave: Validação falhou - preço inválido.'); // <--- CONSOLE.LOG
       return;
     }
@@ -96,7 +100,7 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
     };
     console.log('handleSave: Objeto de promoção a ser salvo:', newOrUpdatedPromotion); // <--- CONSOLE.LOG
 
-
+    setIsLoading(true);
     let success = false;
 
     // --- CÓDIGO REAL (COM BACKEND) - COMENTADO ---
@@ -119,24 +123,29 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
       } else {
         const errorData = await response.json();
         console.error(`Erro ao ${isEditing ? 'atualizar' : 'adicionar'} promoção no backend:`, response.status, errorData);
-        Alert.alert('Erro', `Não foi possível ${isEditing ? 'salvar' : 'adicionar'} a promoção: ${errorData.message || 'Tente novamente.'}`);
+        setErrorMessage(`Não foi possível ${isEditing ? 'salvar' : 'adicionar'} a promoção: ${errorData.message || 'Tente novamente.'}`);
         success = false;
       }
     } catch (error) {
       console.error('Erro de rede ou na requisição de salvar promoção:', error);
-      Alert.alert('Erro', 'Erro de conexão. Tente novamente.');
+      setErrorMessage('Erro de conexão. Tente novamente.');
       success = false;
     }
     */
     // --- FIM DO CÓDIGO REAL (COM BACKEND) - COMENTADO ---
 
     // --- CÓDIGO DE SIMULAÇÃO (ATIVO) ---
-    if (!success) {
+    try {
       success = await simulateSavePromotionApi(newOrUpdatedPromotion, !isEditing);
       console.log('handleSave: Resultado da simulação de salvar:', success); // <--- CONSOLE.LOG
+    } catch (error) {
+      console.error('Erro na simulação de salvar promoção:', error);
+      setErrorMessage('Erro na simulação de salvar promoção.');
+      success = false;
     }
     // --- FIM DO CÓDIGO DE SIMULAÇÃO ---
 
+    setIsLoading(false);
 
     if (success) {
       setSuccessMessage(isEditing ? 'Promoção atualizada com Sucesso!' : 'Promoção Adicionada com Sucesso!');
@@ -159,7 +168,9 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
 
   const confirmDelete = async () => {
     setDeleteModalVisible(false);
+    setErrorMessage(''); // Limpa erros ao tentar excluir
 
+    setIsLoading(true);
     let success = false;
 
     // --- CÓDIGO REAL (COM BACKEND) - COMENTADO ---
@@ -174,26 +185,33 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
         success = true;
       } else {
         const errorData = await response.json();
-        Alert.alert('Erro', `Não foi possível excluir a promoção: ${errorData.message || 'Tente novamente.'}`);
+        setErrorMessage(`Não foi possível excluir a promoção: ${errorData.message || 'Tente novamente.'}`);
         success = false;
       }
     } catch (error) {
-      Alert.alert('Erro', 'Erro de conexão. Tente novamente.');
+      setErrorMessage('Erro de conexão. Tente novamente.');
       success = false;
     }
     */
     // --- FIM DO CÓDIGO REAL (COM BACKEND) - COMENTADO ---
 
     // --- CÓDIGO DE SIMULAÇÃO (ATIVO) ---
-    if (!success) {
+    try {
       if (initialPromotion?.id) {
         success = await simulateDeletePromotionApi(initialPromotion.id);
       } else {
         console.error('ID da promoção não encontrado para exclusão simulada.');
+        setErrorMessage('ID da promoção não encontrado para exclusão.');
         success = false;
       }
+    } catch (error) {
+      console.error('Erro na simulação de exclusão de promoção:', error);
+      setErrorMessage('Erro na simulação de exclusão de promoção.');
+      success = false;
     }
     // --- FIM DO CÓDIGO DE SIMULAÇÃO ---
+
+    setIsLoading(false);
 
     if (success) {
       Alert.alert('Excluído', 'Promoção excluída com sucesso!');
@@ -265,13 +283,25 @@ export default function EditPromotionScreen({ route, navigation }: EditPromotion
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>Salvar Alterações</Text>
+      {errorMessage ? (
+        <Text style={styles.errorMessageText}>{errorMessage}</Text>
+      ) : null}
+
+      <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={isLoading}>
+        {isLoading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.saveButtonText}>Salvar Alterações</Text>
+        )}
       </TouchableOpacity>
 
       {isEditing && (
-        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-          <Text style={styles.deleteButtonText}>Excluir Promoção</Text>
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete} disabled={isLoading}>
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.deleteButtonText}>Excluir Promoção</Text>
+          )}
         </TouchableOpacity>
       )}
 
@@ -373,6 +403,12 @@ const styles = StyleSheet.create({
   },
   unitButtonTextActive: {
     color: '#fff',
+  },
+  errorMessageText: {
+    color: 'red',
+    fontSize: 14,
+    marginBottom: 10,
+    textAlign: 'center',
   },
   saveButton: {
     backgroundColor: '#19C37D',
