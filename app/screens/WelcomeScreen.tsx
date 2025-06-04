@@ -1,20 +1,25 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View, Text, Image, Dimensions } from 'react-native';
 import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const windowWidth = Dimensions.get('window').width;
 
 export default function WelcomeScreen() {
-  const handleOptionPress = (option: string) => {
-    if (option === 'Entregador') {
-      router.replace('/entregador/cadastro');
-    
-    }
-    if (option === 'Parceiros'){
-      router.replace('/parceiros/login');
-    }
-    else {
+  const handleOptionPress = async (option: string) => {
+    try {
+      await AsyncStorage.setItem('tipoUsuario', option);
+      
+      if (option === 'Entregador') {
+        router.replace('/entregador/login');
+      } else if (option === 'Parceiros') {
+        router.replace('/parceiros/login');
+      } /*else if (option === 'Cliente') {
+        router.replace('/cliente/home');
+      }*/
       console.log(`Selecionou: ${option}`);
+    } catch (error) {
+      console.error('Erro ao salvar tipo de usuário:', error);
     }
   };
 
