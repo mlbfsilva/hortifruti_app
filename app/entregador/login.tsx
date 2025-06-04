@@ -3,12 +3,12 @@ import { StyleSheet, View, TextInput, TouchableOpacity, Text, Alert } from 'reac
 import { router } from 'expo-router';
 import { AntDesign } from '@expo/vector-icons';
 
-export default function CadastroEntregador() {
+export default function LoginEntregador() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
   const handleVoltar = () => {
-    router.back();
+    router.push('/screens/WelcomeScreen');
   };
 
   const handleEntrar = () => {
@@ -22,7 +22,7 @@ export default function CadastroEntregador() {
     }
 
     // Aqui você implementará a lógica de login
-    router.push('/entregador/conta-bancaria');
+    router.replace('/entregador/(tabs)');
   };
 
   const handleCriarConta = () => {
