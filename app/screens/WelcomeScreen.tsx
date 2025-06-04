@@ -31,7 +31,7 @@ export default function WelcomeScreen() {
       <View style={styles.contentContainer}>
         <View style={styles.starContainer}>
           <Image
-            source={require('../assets/images/Star 1.png')}
+            source={require('../../assets/images/Star 1.png')}
             style={styles.starImage}
             resizeMode="contain"
           />
