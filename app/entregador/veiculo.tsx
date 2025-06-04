@@ -11,7 +11,7 @@ export default function Veiculo() {
 
   const handleConfirmar = () => {
     if (!selectedOption) return;
-    router.push('/(tabs)');
+    router.push('/entregador/(tabs)');
   };
 
   return (
