@@ -20,8 +20,6 @@ export default function LoginEntregador() {
       );
       return;
     }
-
-    // Aqui você implementará a lógica de login
     router.replace('/entregador/(tabs)');
   };
 
