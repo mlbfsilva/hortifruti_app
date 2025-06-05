@@ -7,7 +7,7 @@ export default function criarContaParceirosAnalise() {
   const [check, setCheck] = useState<boolean>(false);
 
   const handleConfirmar = () => {
-    router.push("./algumlugar");
+    router.replace("/parceiros/(tabs)");
 
   };
 
