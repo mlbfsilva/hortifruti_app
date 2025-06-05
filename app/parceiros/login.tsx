@@ -20,7 +20,7 @@ export default function loginParceiros(){
             );
             return;
         }
-        //router.push('');
+        router.replace('/parceiros/(tabs)');
     }
 
     const handleCadastrarConta = () => {
