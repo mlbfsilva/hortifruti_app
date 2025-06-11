@@ -1,0 +1,3 @@
+export const supaUrl = 'https://twkbivulbmtjoanccemw.supabase.co';
+
+export const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3a2JpdnVsYm10am9hbmNjZW13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk2MDA4OTUsImV4cCI6MjA2NTE3Njg5NX0.sy8YnF0Y6PEOMREQx4xKspWpV44iE6QY90Xe9fxIrQM';
