@@ -2,14 +2,15 @@ import React, { useState } from "react";
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, Alert} from 'react-native';
 import { router } from 'expo-router';
 import { AntDesign } from '@expo/vector-icons';
+import { supabase } from "@/lib/supabase";
 
 export default function criarContaParceiros(){
     const [email, setEmail] = useState('');
-    const [senha, setSenha] = useState('');
+    const [password, setPassword] = useState('');
     const [confimarsenha, setConfirmarSenha] = useState('');
 
     const handleConfirmar = () => {
-        if (!email || !senha || !confimarsenha) {
+        if (!email || !password || !confimarsenha) {
             Alert.alert(
             "Atenção",
             "Campos incompletos. Para avançar, preencha o campo corretamente.",
@@ -22,6 +23,30 @@ export default function criarContaParceiros(){
     const handleVoltar = () => {
         router.back();
     };
+
+  async function handleSignUp() {
+  if (password !== confimarsenha) {
+    Alert.alert("Erro", "As senhas não coincidem.");
+    return;
+  }
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        name: email
+      }
+    }
+  });
+
+  if (error) {
+    Alert.alert('Erro', error.message);
+    return;
+  }
+
+  router.push('/parceiros/criar-conta-info');
+}
 
 
     return(
@@ -49,8 +74,8 @@ export default function criarContaParceiros(){
                               <Text style={styles.label}>Senha:</Text>
                               <TextInput
                                   style={styles.input}
-                                  value={senha}
-                                  onChangeText={setSenha}
+                                  value={password}
+                                  onChangeText={setPassword}
                                   secureTextEntry
                                   placeholder="********"
                               />
@@ -64,7 +89,7 @@ export default function criarContaParceiros(){
                                 placeholder="********"
                               />
 
-                              <TouchableOpacity style={styles.confimButton} onPress={handleConfirmar}>
+                              <TouchableOpacity style={styles.confimButton} onPress={handleSignUp}>
                                 <Text style={styles.confirmButtonText}>Próximo</Text>
                               </TouchableOpacity>
 
