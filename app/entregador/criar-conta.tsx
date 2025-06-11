@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { AntDesign } from '@expo/vector-icons';
+import { supabase } from "../../lib/supabase";
 
 export default function CriarContaEntregador() {
   const [nomeCompleto, setNomeCompleto] = useState('');
@@ -9,21 +10,29 @@ export default function CriarContaEntregador() {
   const [telefone, setTelefone] = useState('');
   const [email, setEmail] = useState('');
 
-  const handleConfirmar = () => {
-    // Validação básica dos campos
-    if (!nomeCompleto || !cpf || !telefone || !email) {
-      Alert.alert(
-        "Campos Incompletos",
-        "Por favor, preencha todos os campos para continuar.",
-        [
-          { text: "OK", onPress: () => console.log("OK Pressed") }
-        ]
-      );
+async function handleCadastro() {
+    if (!nomeCompleto || !telefone || !cpf || !email) {
+      Alert.alert("Erro", "Todos os campos devem ser preenchidos!");
       return;
     }
 
-    // Navega para a tela de confirmação de telefone
-    router.push('/entregador/confirmar-telefone');
+    const { data, error } = await supabase
+      .from("entregador")
+      .insert([{ 
+        nome_entregador: nomeCompleto,
+        telefone: telefone,
+        cpf: cpf,
+        email:email 
+      }]);
+
+    if (error) {
+      Alert.alert("Erro", error.message);
+    } else {
+        router.push({
+          pathname: "/entregador/confirmar-telefone",
+          params: { nomeCompleto, telefone, cpf, email },
+        });
+      }
   };
 
   const handleVoltar = () => {
@@ -80,7 +89,7 @@ export default function CriarContaEntregador() {
             autoCapitalize="none"
           />
 
-          <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmar}>
+          <TouchableOpacity style={styles.confirmButton} onPress={handleCadastro}>
             <Text style={styles.confirmButtonText}>CONFIRMAR</Text>
           </TouchableOpacity>
         </View>
