@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, TextInput, Alert } from 'react-native';
-import { router } from 'expo-router';
+import { useLocalSearchParams, router } from 'expo-router';
 import { AntDesign } from '@expo/vector-icons';
 
+
 export default function ConfirmarTelefone() {
+  const params = useLocalSearchParams();
   const [codigo, setCodigo] = useState('');
 
   const handleVoltar = () => {
@@ -19,9 +21,11 @@ export default function ConfirmarTelefone() {
       );
       return;
     }
-
     // Navega para a tela de criação de senha
-    router.push('/entregador/criar-senha');
+      router.push({
+      pathname: "/entregador/criar-senha",
+      params: params // Passa os dados do usuário para a próxima tela
+    });
   };
 
   const handleReenviarCodigo = () => {
@@ -42,7 +46,7 @@ export default function ConfirmarTelefone() {
         <Text style={styles.instruction}>
           Insira o código enviado para
         </Text>
-        <Text style={styles.phoneNumber}>+55 61 9 9457-8908</Text>
+        <Text style={styles.phoneNumber}>{params.telefone}</Text>
 
         <TextInput
           style={styles.codeInput}

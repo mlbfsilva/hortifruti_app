@@ -1,35 +1,38 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, Alert } from 'react-native';
-import { router } from 'expo-router';
+import { useLocalSearchParams, router } from 'expo-router';
 import { AntDesign } from '@expo/vector-icons';
+import { supabase } from "../../lib/supabase";
 
 export default function CriarSenha() {
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
+  const params = useLocalSearchParams();
+  
 
   const handleVoltar = () => {
     router.back();
   };
 
-  const handleConfirmar = () => {
-    if (!senha || !confirmarSenha) {
-      Alert.alert(
-        "Campos Incompletos",
-        "Por favor, preencha ambos os campos de senha.",
-        [{ text: "OK" }]
-      );
-      return;
-    }
+async function handleSenha() {
+      if (senha !== confirmarSenha) {
+        Alert.alert("Erro", "As senhas não coincidem.");
+        return;
+      }
 
-    if (senha !== confirmarSenha) {
-      Alert.alert(
-        "Senhas Diferentes",
-        "As senhas não coincidem. Por favor, verifique.",
-        [{ text: "OK" }]
-      );
-      return;
-    }
+    const { data, error } = await supabase.from("entregador").insert([{ 
+    nome_entregador: params.nomeCompleto,
+    telefone: params.telefone,
+    cpf: params.cpf,
+    email: params.email,
+    senha: senha, 
+  }]);
 
+    if (error) {
+      Alert.alert("Erro", error.message);
+    } else {
+      Alert.alert("Sucesso", "Cadastro realizado!");
+    }
     // Navega para a tela de dados bancários
     router.push('/entregador/conta-bancaria');
   };
@@ -68,7 +71,7 @@ export default function CriarSenha() {
             placeholder="Digite novamente sua senha"
           />
 
-          <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmar}>
+          <TouchableOpacity style={styles.confirmButton} onPress={handleSenha}>
             <Text style={styles.confirmButtonText}>CONFIRMAR</Text>
           </TouchableOpacity>
         </View>
