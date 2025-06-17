@@ -1,5 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions } from 'react-native';
+import { ResponsiveCard } from './Responsivecard';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 type Categoria = {
   id: string;
@@ -13,7 +16,22 @@ const categorias: Categoria[] = [
   { id: "4", title: "Raízes e temperos" }, 
 ];
 
+// Componente Separador de Itens para CarroselCategorias
+const CategoriaItemSeparator = () => <View style={{ width: 12 }} />;
+
 export const CarroselCategorias = () => {
+  const renderItem = ({ item, index }: { item: Categoria; index: number }) => {
+    const ITEM_SPACING = 12; // Espaçamento entre os cartões
+    const isLastItem = index === categorias.length - 1; // Verifica se é o último item
+    const marginRight = isLastItem ? 0 : ITEM_SPACING; // Define marginRight condicionalmente
+
+    return (
+      <ResponsiveCard style={styles.box} marginRight={marginRight}>
+        <Text style={styles.cardText}>{item.title}</Text>
+      </ResponsiveCard>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.getStartedText}>Promoção do dia:</Text>
@@ -23,12 +41,9 @@ export const CarroselCategorias = () => {
         keyExtractor={(item) => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.flatListContent}
-        renderItem={({ item }) => (
-          <View style={styles.box}>
-            <Text style={styles.cardText}>{item.title}</Text> {}
-          </View>
-        )}
+        contentContainerStyle={styles.container}
+        renderItem={renderItem}
+        ItemSeparatorComponent={CategoriaItemSeparator}
       />
     </View>
   );
@@ -40,6 +55,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 40,
     backgroundColor: '#fff',
+    paddingHorizontal: 16,
   },
   getStartedText: {
     fontSize: 17,
@@ -47,25 +63,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 30,
   },
-  flatListContent: {
-    paddingLeft: 16,
-    paddingRight: 8,
-  },
   box: {
-    height: 80,
-    width: 180,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.10)',
-    backgroundColor: '#FCFCFE',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
   },
   cardText: {
     textAlign: 'center',
