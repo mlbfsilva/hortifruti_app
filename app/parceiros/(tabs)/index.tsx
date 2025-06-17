@@ -59,9 +59,10 @@ export default function OrderListScreen() {
     setActiveTab('approve');
   };
 
+  /*
   const navigateToRecurringOrders = () => {
     router.push('/pedidos/recurring');
-  };
+  };*/
 
   const renderHeader = () => (
     <View style={styles.header}>
@@ -70,11 +71,11 @@ export default function OrderListScreen() {
       </TouchableOpacity>
       <Text style={styles.headerTitle}>Pedidos</Text>
       <View style={styles.headerIcons}>
-        <TouchableOpacity onPress={navigateToRecurringOrders}>
+        {/*<TouchableOpacity onPress={navigateToRecurringOrders}>
           <View style={styles.notificationBadge}>
             <Text style={styles.notificationText}>3</Text>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity>*/}
       </View>
     </View>
   );
