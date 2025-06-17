@@ -16,4 +16,4 @@ Stephany Rodrigues da Silva (UC23200629)
 ## Instruções e comandos
 
 - npm install
--
+- npx expo install @supabase/supabase-js @react-native-async-storage/async-storage @rneui/themed react-native-url-polyfill
