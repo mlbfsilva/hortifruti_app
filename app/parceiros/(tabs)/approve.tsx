@@ -112,7 +112,7 @@ export default function ApproveOrdersScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push('/pedidos')}>
+        <TouchableOpacity onPress={() => router.push('/parceiros/(tabs)')}>
           <Text style={styles.backButton}>{'<'}</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Pedidos</Text>
@@ -128,7 +128,7 @@ export default function ApproveOrdersScreen() {
       <View style={styles.tabBar}>
         <TouchableOpacity 
           style={[styles.tab]}
-          onPress={() => router.push('/pedidos')}
+          onPress={() => router.push('/parceiros/(tabs)')}
         >
           <Text style={[styles.tabText]}>Lista de Pedidos</Text>
         </TouchableOpacity>

@@ -14,9 +14,9 @@ export default function WelcomeScreen() {
         router.replace('/entregador/login');
       } else if (option === 'Parceiros') {
         router.replace('/parceiros/login');
-      } /*else if (option === 'Cliente') {
-        router.replace('/cliente/home');
-      }*/
+      } else if (option === 'Cliente') {
+        router.replace('/clientes/login');
+      }
       console.log(`Selecionou: ${option}`);
     } catch (error) {
       console.error('Erro ao salvar tipo de usuário:', error);

@@ -46,22 +46,31 @@ const pedidos: Pedido[] = [
   },
 ];
 
+// Componente Separador de Itens
+const ItemSeparator = () => <View style={{ width: 12 }} />;
+
 export const CarroselPedidos = () => {
-  const renderItem: ListRenderItem<Pedido> = ({ item }) => (
-    <ResponsiveCard>
-      <View style={styles.content}>
-        <Image source={item.image} style={styles.imagem} />
-        <View style={styles.info}>
-          <Text style={styles.idPedido}>Pedido #{item.id}</Text>
-          <Text style={styles.nomeLoja}>{item.loja}</Text>
-          <Text style={styles.valor}>{item.valor}</Text>
+  const renderItem: ListRenderItem<Pedido> = ({ item, index }) => {
+    const ITEM_SPACING = 12; // Espaçamento entre os cartões
+    const isLastItem = index === pedidos.length - 1; // Verifica se é o último item
+    const marginRight = isLastItem ? 0 : ITEM_SPACING; // Define marginRight condicionalmente
+
+    return (
+      <ResponsiveCard style={{ marginRight: marginRight }}>
+        <View style={styles.content}>
+          <Image source={item.image} style={styles.imagem} />
+          <View style={styles.info}>
+            <Text style={styles.idPedido}>Pedido #{item.id}</Text>
+            <Text style={styles.nomeLoja}>{item.loja}</Text>
+            <Text style={styles.valor}>{item.valor}</Text>
+          </View>
         </View>
-      </View>
-      <TouchableOpacity style={styles.botao}>
-        <Text style={styles.textoBotao}>Pedir Novamente</Text>
-      </TouchableOpacity>
-    </ResponsiveCard>
-  );
+        <TouchableOpacity style={styles.botao}>
+          <Text style={styles.textoBotao}>Pedir Novamente</Text>
+        </TouchableOpacity>
+      </ResponsiveCard>
+    );
+  };
 
   return (
     <FlatList
@@ -71,26 +80,14 @@ export const CarroselPedidos = () => {
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}
+      ItemSeparatorComponent={ItemSeparator} // Usar o separador de itens
     />
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 12,
-  },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 12,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 1, height: 1 },
-    shadowRadius: 3,
-    width: screenWidth * 0.5 - 24, // metade da tela com margem
-    height: screenWidth * 0.5, // altura igual à largura (quase quadrado)
-    marginRight: 12,
-    justifyContent: "space-between",
+    paddingHorizontal: 16, // Corresponde ao FLATLIST_OUTER_PADDING do ResponsiveCard
   },
   content: {
     flexDirection: "row",
