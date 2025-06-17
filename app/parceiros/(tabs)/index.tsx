@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import OrderDetailsModal from '@/components/OrderDetailsModal';
+import ApproveOrdersList from '@/components/ApproveOrdersList';
 
 interface Order {
   id: string;
@@ -56,7 +57,6 @@ export default function OrderListScreen() {
 
   const navigateToApproveOrders = () => {
     setActiveTab('approve');
-    router.push('/pedidos/approve');
   };
 
   const navigateToRecurringOrders = () => {
@@ -111,13 +111,23 @@ export default function OrderListScreen() {
     </View>
   );
 
+  const renderContent = () => {
+    if (activeTab === 'approve') {
+      return <ApproveOrdersList />;
+    }
+
+    return (
+      <ScrollView style={styles.orderList}>
+        {MOCK_ORDERS.map(renderOrderCard)}
+      </ScrollView>
+    );
+  };
+
   return (
     <View style={styles.container}>
       {renderHeader()}
       {renderTabs()}
-      <ScrollView style={styles.orderList}>
-        {MOCK_ORDERS.map(renderOrderCard)}
-      </ScrollView>
+      {renderContent()}
       {selectedOrder && (
         <OrderDetailsModal
           visible={isModalVisible}

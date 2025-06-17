@@ -1,5 +1,4 @@
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface Order {
@@ -46,9 +45,8 @@ const MOCK_ORDERS: Order[] = [
   },
 ];
 
-export default function ApproveOrdersScreen() {
+export default function ApproveOrdersList() {
   const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS);
-  const router = useRouter();
 
   const handleApprove = (orderId: string) => {
     setOrders(orders.filter(order => order.id !== orderId));
@@ -66,10 +64,6 @@ export default function ApproveOrdersScreen() {
       'O pedido foi recusado.',
       [{ text: 'OK' }]
     );
-  };
-
-  const navigateToRecurringOrders = () => {
-    router.push('/pedidos/recurring');
   };
 
   const renderOrderCard = (order: Order) => (
@@ -110,108 +104,13 @@ export default function ApproveOrdersScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push('/parceiros/(tabs)')}>
-          <Text style={styles.backButton}>{'<'}</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Pedidos</Text>
-        <View style={styles.notificationContainer}>
-          <TouchableOpacity onPress={navigateToRecurringOrders}>
-            <View style={styles.notificationBadge}>
-              <Text style={styles.notificationText}>3</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.tabBar}>
-        <TouchableOpacity 
-          style={[styles.tab]}
-          onPress={() => router.push('/parceiros/(tabs)')}
-        >
-          <Text style={[styles.tabText]}>Lista de Pedidos</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.tab, styles.activeTab]}>
-          <Text style={[styles.tabText, styles.activeTabText]}>Aprovar Pedidos</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView style={styles.orderList}>
-        {orders.map(renderOrderCard)}
-      </ScrollView>
-    </View>
+    <ScrollView style={styles.orderList}>
+      {orders.map(renderOrderCard)}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-    paddingTop: 50,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  backButton: {
-    fontSize: 24,
-    color: '#000',
-  },
-  title: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    flex: 1,
-    textAlign: 'center',
-    marginLeft: -20,
-  },
-  notificationContainer: {
-    width: 24,
-  },
-  notificationBadge: {
-    backgroundColor: '#4CAF50',
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  notificationText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  tabBar: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    margin: 20,
-    borderRadius: 25,
-    padding: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    borderRadius: 20,
-  },
-  activeTab: {
-    backgroundColor: '#2196F3',
-  },
-  tabText: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: '500',
-  },
-  activeTabText: {
-    color: 'white',
-  },
   orderList: {
     flex: 1,
     paddingHorizontal: 20,
@@ -282,4 +181,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
-});
+}); 
