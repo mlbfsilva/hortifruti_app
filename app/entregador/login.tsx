@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { AntDesign } from '@expo/vector-icons';
+import { supabase } from '@/lib/supabase';
 
 export default function LoginEntregador() {
   const [email, setEmail] = useState('');
@@ -11,7 +12,7 @@ export default function LoginEntregador() {
     router.push('/screens/WelcomeScreen');
   };
 
-  const handleEntrar = () => {
+  const handleEntrar = async () => {
     if (!email || !senha) {
       Alert.alert(
         "Campos Incompletos",
@@ -20,6 +21,24 @@ export default function LoginEntregador() {
       );
       return;
     }
+
+    const { data, error } = await supabase
+      .from('usersEntregador')
+      .select('*')
+      .eq('email', email);
+
+    if (error || !data || data.length === 0) {
+      Alert.alert("Erro", "Email não encontrado.");
+      return;
+    }
+
+    const usuario = data[0]; // pega o primeiro
+
+    if (usuario.senha !== senha) {
+      Alert.alert("Erro", "Senha incorreta.");
+      return;
+    }
+
     router.replace('/entregador/(tabs)');
   };
 
