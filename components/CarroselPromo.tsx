@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions, ViewStyle } from 'react-native';
 import { ResponsiveCard } from './Responsivecard';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -26,7 +26,7 @@ export const CarroselCategorias = () => {
     const marginRight = isLastItem ? 0 : ITEM_SPACING; // Define marginRight condicionalmente
 
     return (
-      <ResponsiveCard style={styles.box} marginRight={marginRight}>
+      <ResponsiveCard style={{ ...styles.box, marginRight } as ViewStyle}>
         <Text style={styles.cardText}>{item.title}</Text>
       </ResponsiveCard>
     );
