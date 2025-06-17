@@ -1,9 +1,37 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { supabase } from '@/lib/supabase';
 
 export default function PerfilEntregador() {
+  const [tipoEntrega, setTipoEntrega] = useState<string | null>(null);
+
+  useEffect(() => {
+    const carregarTipoEntrega = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('tipoentrega')
+          .select('tipo')
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (error) {
+          console.error('Erro ao carregar tipo de entrega:', error);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          setTipoEntrega(data[0].tipo);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar tipo de entrega:', error);
+      }
+    };
+
+    carregarTipoEntrega();
+  }, []);
+
   const handleLogout = () => {
     // Implementar lógica de logout aqui
     router.replace('/screens/WelcomeScreen');
@@ -29,6 +57,10 @@ export default function PerfilEntregador() {
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>Veículo</Text>
             <Text style={styles.infoValue}>Moto</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoLabel}>Tipo de Entrega</Text>
+            <Text style={styles.infoValue}>{tipoEntrega === 'fixo' ? 'Fixo' : tipoEntrega === 'livre' ? 'Livre' : 'Não definido'}</Text>
           </View>
         </View>
       </View>

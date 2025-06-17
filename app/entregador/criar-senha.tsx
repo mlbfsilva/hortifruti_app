@@ -31,7 +31,8 @@ export default function CriarSenha() {
     if (error) {
       Alert.alert("Erro", error.message);
       return;
-    } else {
+    }
+    else {
       Alert.alert("Sucesso", "Cadastro realizado!");
     }
     // Navega para a tela de dados bancários

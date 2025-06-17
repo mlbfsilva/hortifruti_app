@@ -1,16 +1,34 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
+import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native';
+import { useLocalSearchParams, router } from 'expo-router';
+import { supabase } from '@/lib/supabase';
 
 export default function Veiculo() {
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const params = useLocalSearchParams();
+  const [selectedOption, setSelectedOption] = useState('');
 
   const handleOptionSelect = (option: string) => {
     setSelectedOption(option);
   };
 
-  const handleConfirmar = () => {
-    if (!selectedOption) return;
+  const handleConfirmar = async () => {
+    if (!selectedOption) {
+      Alert.alert("Erro", "Selecione um tipo de veículo.");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("tipoentrega")
+      .insert([{
+        tipo: params.selectedOption,
+        veiculo: selectedOption,
+      }]);
+
+    if (error) {
+      Alert.alert("Erro ao salvar", error.message);
+      return;
+    }
+
     router.push('/entregador/(tabs)');
   };
 
@@ -18,32 +36,33 @@ export default function Veiculo() {
     <View style={styles.container}>
       <Text style={styles.title}>De que forma deseja fazer a entrega?</Text>
 
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[
           styles.optionButton,
-          selectedOption === 'moto' && styles.selectedOption
+          selectedOption === 'moto' && styles.selectedOption,
         ]}
         onPress={() => handleOptionSelect('moto')}
       >
         <Text style={styles.optionText}>Moto</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[
           styles.optionButton,
-          selectedOption === 'carro' && styles.selectedOption
+          selectedOption === 'carro' && styles.selectedOption,
         ]}
         onPress={() => handleOptionSelect('carro')}
       >
         <Text style={styles.optionText}>Carro</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[
           styles.confirmButton,
-          !selectedOption && styles.disabledButton
-        ]} 
+          !selectedOption && styles.disabledButton,
+        ]}
         onPress={handleConfirmar}
+        disabled={!selectedOption}
       >
         <Text style={styles.confirmButtonText}>Confirmar</Text>
       </TouchableOpacity>
@@ -97,4 +116,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-}); 
+});
