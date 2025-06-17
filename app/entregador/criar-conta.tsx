@@ -2,38 +2,24 @@ import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { AntDesign } from '@expo/vector-icons';
-import { supabase } from "../../lib/supabase";
 
 export default function CriarContaEntregador() {
-  const [nomeCompleto, setNomeCompleto] = useState('');
+  const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
   const [telefone, setTelefone] = useState('');
   const [email, setEmail] = useState('');
 
 async function handleCadastro() {
-    if (!nomeCompleto || !telefone || !cpf || !email) {
+    if (!nome || !telefone || !cpf || !email) {
       Alert.alert("Erro", "Todos os campos devem ser preenchidos!");
       return;
-    }
-
-    const { data, error } = await supabase
-      .from("entregador")
-      .insert([{ 
-        nome_entregador: nomeCompleto,
-        telefone: telefone,
-        cpf: cpf,
-        email:email 
-      }]);
-
-    if (error) {
-      Alert.alert("Erro", error.message);
-    } else {
+    }else
         router.push({
           pathname: "/entregador/confirmar-telefone",
-          params: { nomeCompleto, telefone, cpf, email },
+          params: { nome, telefone, cpf, email },
         });
-      }
-  };
+  }
+
 
   const handleVoltar = () => {
     router.back();
@@ -58,8 +44,8 @@ async function handleCadastro() {
           <Text style={styles.label}>Nome Completo:</Text>
           <TextInput
             style={styles.input}
-            value={nomeCompleto}
-            onChangeText={setNomeCompleto}
+            value={nome}
+            onChangeText={setNome}
             autoCapitalize="words"
           />
 
