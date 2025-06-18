@@ -1,15 +1,106 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Pressable, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+
+interface PedidoDisponivel {
+  id: string;
+  loja: string;
+  numero?: string;
+  distancia: string;
+  endereco: string;
+  valor: string;
+}
 
 export default function PedidoAceito() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const [pedido, setPedido] = useState<PedidoDisponivel | null>(null);
+  const [carregando, setCarregando] = useState(true);
 
-  const handleConfirmarRetirada = () => {
-    router.push('/entregador/corrida-andamento');
+  useEffect(() => {
+    if (id) {
+      buscarPedido();
+    }
+  }, [id]);
+
+  const buscarPedido = async () => {
+    setCarregando(true);
+    try {
+      const { data, error } = await supabase
+        .from('solicitacoes_pedidos')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error("Erro ao buscar pedido: ", error.message);
+      } else {
+        setPedido(data as PedidoDisponivel);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar pedido: ", error);
+    } finally {
+      setCarregando(false);
+    }
   };
+
+  const handleConfirmarRetirada = async () => {
+    if (pedido) {
+      try {
+        const { error } = await supabase
+          .from('solicitacoes_pedidos')
+          .update({ status: 'em_andamento' })
+          .eq('id', pedido.id);
+
+        if (error) {
+          console.error('Erro ao confirmar retirada: ', error.message);
+          alert('Erro ao confirmar retirada.');
+          return;
+        }
+        
+        router.push('/entregador/corrida-andamento');
+      } catch (error) {
+        console.error('Erro ao confirmar retirada: ', error);
+        alert('Erro ao confirmar retirada.');
+      }
+    }
+  };
+
+  if (carregando) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="black" />
+          </Pressable>
+          <Text style={styles.titulo}>Pedido Aceito</Text>
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#000" />
+          <Text style={styles.loadingText}>Carregando informações do pedido...</Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (!pedido) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="black" />
+          </Pressable>
+          <Text style={styles.titulo}>Pedido Aceito</Text>
+        </View>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.errorText}>Pedido não encontrado</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -25,7 +116,7 @@ export default function PedidoAceito() {
           <View style={styles.pedidoHeader}>
             <View style={styles.pedidoTag}>
               <MaterialCommunityIcons name="shopping" size={16} color="#FFF" />
-              <Text style={styles.pedidoId}>Pedido #{id}</Text>
+              <Text style={styles.pedidoId}>Pedido #{pedido.numero || id}</Text>
             </View>
             <View style={styles.statusTag}>
               <Text style={styles.statusText}>Aguardando Retirada</Text>
@@ -38,7 +129,7 @@ export default function PedidoAceito() {
               <MaterialCommunityIcons name="store" size={20} color="#666" />
               <View style={styles.infoContent}>
                 <Text style={styles.infoLabel}>Retirar em:</Text>
-                <Text style={styles.infoTexto}>Loja 01</Text>
+                <Text style={styles.infoTexto}>{pedido.loja}</Text>
               </View>
             </View>
             <View style={styles.infoItem}>
@@ -48,24 +139,31 @@ export default function PedidoAceito() {
                 <Text style={styles.infoTexto}>15 minutos</Text>
               </View>
             </View>
+            <View style={styles.infoItem}>
+              <MaterialCommunityIcons name="currency-usd" size={20} color="#666" />
+              <View style={styles.infoContent}>
+                <Text style={styles.infoLabel}>Valor da entrega:</Text>
+                <Text style={styles.infoTexto}>R$ {pedido.valor}</Text>
+              </View>
+            </View>
           </View>
 
           <View style={styles.divisor} />
 
           <View style={styles.secao}>
-            <Text style={styles.subtitulo}>Informações do Cliente:</Text>
+            <Text style={styles.subtitulo}>Informações da Entrega:</Text>
             <View style={styles.infoItem}>
               <MaterialCommunityIcons name="map-marker" size={20} color="#666" />
               <View style={styles.infoContent}>
                 <Text style={styles.infoLabel}>Endereço de entrega:</Text>
-                <Text style={styles.infoTexto}>Rua das Flores, 123 - Centro</Text>
+                <Text style={styles.infoTexto}>{pedido.endereco}</Text>
               </View>
             </View>
             <View style={styles.infoItem}>
-              <MaterialCommunityIcons name="phone" size={20} color="#666" />
+              <MaterialCommunityIcons name="map-marker-distance" size={20} color="#666" />
               <View style={styles.infoContent}>
-                <Text style={styles.infoLabel}>Telefone para contato:</Text>
-                <Text style={styles.infoTexto}>(11) 99999-9999</Text>
+                <Text style={styles.infoLabel}>Distância:</Text>
+                <Text style={styles.infoTexto}>{pedido.distancia} km</Text>
               </View>
             </View>
           </View>
@@ -114,6 +212,22 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 20,
     fontWeight: 'bold',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666',
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#ff0000',
+    textAlign: 'center',
   },
   content: {
     flex: 1,
