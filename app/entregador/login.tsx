@@ -12,32 +12,21 @@ export default function LoginEntregador() {
     router.push('/screens/WelcomeScreen');
   };
 
-  const handleEntrar = async () => {
-    if (!email || !senha) {
-      Alert.alert(
-        "Campos Incompletos",
-        "Por favor, preencha todos os campos.",
-        [{ text: "OK" }]
-      );
-      return;
-    }
+const handleEntrar = async () => {
+  if (!email || !senha) {
+    Alert.alert("Campos Incompletos", "Por favor, preencha todos os campos.");
+    return;
+  }
 
-    const { data, error } = await supabase
-      .from('usersEntregador')
-      .select('*')
-      .eq('email', email);
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password: senha,
+  });
 
-    if (error || !data || data.length === 0) {
-      Alert.alert("Erro", "Email não encontrado.");
-      return;
-    }
-
-    const usuario = data[0]; // pega o primeiro
-
-    if (usuario.senha !== senha) {
-      Alert.alert("Erro", "Senha incorreta.");
-      return;
-    }
+  if (error) {
+    Alert.alert("Erro", "Email ou senha incorretos.");
+    return;
+  }
 
     router.replace('/entregador/(tabs)');
   };

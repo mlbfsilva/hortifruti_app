@@ -5,7 +5,7 @@ import { AntDesign } from '@expo/vector-icons';
 import { supabase } from "../../lib/supabase";
 
 export default function CriarSenha() {
-  const [senha, setSenha] = useState('');
+  const [password, setPassword] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const params = useLocalSearchParams();
 
@@ -13,20 +13,24 @@ export default function CriarSenha() {
     router.back();
   };
 
-  async function handleSenha() {
-    if (senha !== confirmarSenha) {
+  async function handleSingUp() {
+    if (password !== confirmarSenha) {
       Alert.alert("Erro", "As senhas não coincidem.");
       return;
     }
 
-    const { data, error } = await supabase
-      .from("usersEntregador").insert([{
-      nome: params.nome,
-      cpf: params.cpf,
-      telefone: params.telefone,
-      email: params.email,
-      senha: senha,
-    }]);
+    const { data, error } = await supabase.auth.signUp
+    ({
+      email: String(params.email),
+      password: password,
+      options: {
+        data: {
+          nome: params.nome,
+          cpf: params.cpf,
+          telefone: params.telefone,
+        }
+      }
+    });
 
     if (error) {
       Alert.alert("Erro", error.message);
@@ -58,8 +62,8 @@ export default function CriarSenha() {
           <Text style={styles.label}>Crie sua senha</Text>
           <TextInput
             style={styles.input}
-            value={senha}
-            onChangeText={setSenha}
+            value={password}
+            onChangeText={setPassword}
             secureTextEntry
             placeholder="Digite sua senha"
           />
@@ -73,7 +77,7 @@ export default function CriarSenha() {
             placeholder="Digite novamente sua senha"
           />
 
-          <TouchableOpacity style={styles.confirmButton} onPress={handleSenha}>
+          <TouchableOpacity style={styles.confirmButton} onPress={handleSingUp}>
             <Text style={styles.confirmButtonText}>CONFIRMAR</Text>
           </TouchableOpacity>
         </View>
