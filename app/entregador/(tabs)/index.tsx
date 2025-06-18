@@ -26,7 +26,7 @@ export default function HomeEntregador() {
     setCarregando(true);
     const {data, error} = await supabase
     .from('solicitacoes_pedidos')
-    .select('*')
+    .select('*');
     
 
     if (error) {
