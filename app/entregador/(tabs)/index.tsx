@@ -27,7 +27,7 @@ export default function HomeEntregador() {
     const {data, error} = await supabase
     .from('solicitacoes_pedidos')
     .select('*')
-    .eq('status', 'disponivel');
+
 
     if (error) {
       console.error("Erro ao buscar pedidos: ", error.message);
