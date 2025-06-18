@@ -8,29 +8,31 @@ export default function CriarSenha() {
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const params = useLocalSearchParams();
-  
 
   const handleVoltar = () => {
     router.back();
   };
 
-async function handleSenha() {
-      if (senha !== confirmarSenha) {
-        Alert.alert("Erro", "As senhas não coincidem.");
-        return;
-      }
+  async function handleSenha() {
+    if (senha !== confirmarSenha) {
+      Alert.alert("Erro", "As senhas não coincidem.");
+      return;
+    }
 
-    const { data, error } = await supabase.from("entregador").insert([{ 
-    nome_entregador: params.nomeCompleto,
-    telefone: params.telefone,
-    cpf: params.cpf,
-    email: params.email,
-    senha: senha, 
-  }]);
+    const { data, error } = await supabase
+      .from("usersEntregador").insert([{
+      nome: params.nome,
+      cpf: params.cpf,
+      telefone: params.telefone,
+      email: params.email,
+      senha: senha,
+    }]);
 
     if (error) {
       Alert.alert("Erro", error.message);
-    } else {
+      return;
+    }
+    else {
       Alert.alert("Sucesso", "Cadastro realizado!");
     }
     // Navega para a tela de dados bancários

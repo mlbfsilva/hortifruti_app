@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import OrderDetailsModal from '@/components/OrderDetailsModal';
+import ApproveOrdersList from '@/components/ApproveOrdersList';
 
 interface Order {
   id: string;
@@ -56,12 +57,12 @@ export default function OrderListScreen() {
 
   const navigateToApproveOrders = () => {
     setActiveTab('approve');
-    router.push('/pedidos/approve');
   };
 
+  /*
   const navigateToRecurringOrders = () => {
     router.push('/pedidos/recurring');
-  };
+  };*/
 
   const renderHeader = () => (
     <View style={styles.header}>
@@ -70,11 +71,11 @@ export default function OrderListScreen() {
       </TouchableOpacity>
       <Text style={styles.headerTitle}>Pedidos</Text>
       <View style={styles.headerIcons}>
-        <TouchableOpacity onPress={navigateToRecurringOrders}>
+        {/*<TouchableOpacity onPress={navigateToRecurringOrders}>
           <View style={styles.notificationBadge}>
             <Text style={styles.notificationText}>3</Text>
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity>*/}
       </View>
     </View>
   );
@@ -111,13 +112,23 @@ export default function OrderListScreen() {
     </View>
   );
 
+  const renderContent = () => {
+    if (activeTab === 'approve') {
+      return <ApproveOrdersList />;
+    }
+
+    return (
+      <ScrollView style={styles.orderList}>
+        {MOCK_ORDERS.map(renderOrderCard)}
+      </ScrollView>
+    );
+  };
+
   return (
     <View style={styles.container}>
       {renderHeader()}
       {renderTabs()}
-      <ScrollView style={styles.orderList}>
-        {MOCK_ORDERS.map(renderOrderCard)}
-      </ScrollView>
+      {renderContent()}
       {selectedOrder && (
         <OrderDetailsModal
           visible={isModalVisible}

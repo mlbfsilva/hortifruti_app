@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 
 export default function TipoEntrega() {
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [selectedOption, setSelectedOption] = useState('');
 
   const handleOptionSelect = (option: string) => {
     setSelectedOption(option);
@@ -11,38 +11,42 @@ export default function TipoEntrega() {
 
   const handleConfirmar = () => {
     if (!selectedOption) return;
-    router.push('/entregador/veiculo');
+
+    router.push({
+      pathname: '/entregador/veiculo',
+      params: { selectedOption },
+    });
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Como deseja fazer entrega?</Text>
 
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[
           styles.optionButton,
-          selectedOption === 'fixo' && styles.selectedOption
+          selectedOption === 'fixo' && styles.selectedOption,
         ]}
         onPress={() => handleOptionSelect('fixo')}
       >
         <Text style={styles.optionText}>Fixo</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[
           styles.optionButton,
-          selectedOption === 'livre' && styles.selectedOption
+          selectedOption === 'livre' && styles.selectedOption,
         ]}
         onPress={() => handleOptionSelect('livre')}
       >
         <Text style={styles.optionText}>Livre</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[
           styles.confirmButton,
-          !selectedOption && styles.disabledButton
-        ]} 
+          !selectedOption && styles.disabledButton,
+        ]}
         onPress={handleConfirmar}
       >
         <Text style={styles.confirmButtonText}>Confirmar</Text>
@@ -97,4 +101,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-}); 
+});
