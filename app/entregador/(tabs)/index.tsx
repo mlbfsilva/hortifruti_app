@@ -1,52 +1,73 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { createClient } from '@supabase/supabase-js';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+
 
 interface PedidoDisponivel {
   id: string;
   loja: string;
   numero?: string;
   distancia: string;
+  endereco: string;
   valor: string;
 }
 
 export default function HomeEntregador() {
   const router = useRouter();
+  const [pedidosDisponiveis, setPedidosDisponiveis] = useState<PedidoDisponivel[]>([]);
+  const [carregando, setCarregando] = useState(true);
 
-  const pedidosDisponiveis: PedidoDisponivel[] = [
-    {
-      id: '1',
-      loja: 'Loja 01',
-      numero: '#131',
-      distancia: '2.5 km',
-      valor: 'R$ 15,00'
-    },
-    {
-      id: '2',
-      loja: 'Loja 02',
-      numero: '#138',
-      distancia: '1.8 km',
-      valor: 'R$ 12,00'
-    },
-    {
-      id: '3',
-      loja: 'Loja 03',
-      numero: '#134',
-      distancia: '3.2 km',
-      valor: 'R$ 18,00'
+  useEffect(()=>{buscarPedidosDisponiveis();}, []);
+
+  const buscarPedidosDisponiveis = async () => {
+    setCarregando(true);
+    const {data, error} = await supabase
+    .from('solicitacoes_pedidos')
+    .select('*')
+    .eq('status', 'disponivel');
+
+    if (error) {
+      console.error("Erro ao buscar pedidos: ", error.message);
+    }else {
+      setPedidosDisponiveis(data as PedidoDisponivel[]);
     }
-  ];
+    setCarregando(false);
+  }
 
-  const handleAceitar = (id: string) => {
-    router.push({
-      pathname: '/entregador/pedido-aceito',
-      params: { id }
-    });
+  const aceitarPedidos = async (id: string) =>{
+    const {error} = await supabase
+    .from('solicitacoes_pedidos')
+    .update({status: 'em_andamento'})
+    .eq('id', id);
+
+    if(error){
+      console.error('Erro ao aceitar pedido: ', error.message);
+      return false;
+    }
+    return true;
+  };
+
+  
+  const handleAceitar = async (id: string) =>{
+    const sucesso = await 
+    aceitarPedidos(id);
+    if(sucesso){
+      router.push({
+        pathname: '/entregador/pedido-aceito',
+        params: {id}
+      });
+    }else {
+      alert('Erro ao aceitar o pedido.');
+    }
   };
 
   const handleRecusar = (id: string) => {
-    console.log('Pedido recusado:', id);
+    console.log('Pedido recusado: ', id);
   };
+
 
   return (
     <ScrollView style={styles.container}>
@@ -68,46 +89,53 @@ export default function HomeEntregador() {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Entregas Disponíveis</Text>
-        {pedidosDisponiveis.map((pedido) => (
-          <View key={pedido.id} style={styles.pedidoCard}>
-            <View style={styles.pedidoInfo}>
-              <View style={styles.lojaRow}>
-                <FontAwesome5 name="store" size={16} color="#666" />
-                <Text style={styles.lojaText}>{pedido.loja}</Text>
-                {pedido.numero && (
-                  <>
-                    <FontAwesome5 name="search" size={16} color="#666" style={styles.icon} />
-                    <Text style={styles.pedidoNumero}>Pedido {pedido.numero}</Text>
-                  </>
-                )}
+
+        {carregando ? (
+          <ActivityIndicator size="large" color="#000" />
+        ) : pedidosDisponiveis.length === 0 ? (
+          <Text style={{ textAlign: 'center', marginTop: 20 }}>Nenhum pedido disponível no momento.</Text>
+        ) : (
+          pedidosDisponiveis.map((solicitacoes_pedidos) => (
+            <View key={solicitacoes_pedidos.id} style={styles.pedidoCard}>
+              <View style={styles.pedidoInfo}>
+                <View style={styles.lojaRow}>
+                  <FontAwesome5 name="store" size={16} color="#666" />
+                  <Text style={styles.lojaText}>{solicitacoes_pedidos.endereco}</Text>
+                  {solicitacoes_pedidos.numero && (
+                    <>
+                      <FontAwesome5 name="search" size={16} color="#666" style={styles.icon} />
+                      <Text style={styles.pedidoNumero}>Pedido {solicitacoes_pedidos.numero}</Text>
+                    </>
+                  )}
+                </View>
+                <View style={styles.detalhesRow}>
+                  <View style={styles.detalheItem}>
+                    <FontAwesome5 name="map-marker-alt" size={16} color="#666" />
+                    <Text style={styles.detalheText}>{solicitacoes_pedidos.distancia}</Text>
+                  </View>
+                  <View style={styles.detalheItem}>
+                    <FontAwesome5 name="dollar-sign" size={16} color="#666" />
+                    <Text style={styles.detalheText}>{solicitacoes_pedidos.valor}</Text>
+                  </View>
+                </View>
               </View>
-              <View style={styles.detalhesRow}>
-                <View style={styles.detalheItem}>
-                  <FontAwesome5 name="map-marker-alt" size={16} color="#666" />
-                  <Text style={styles.detalheText}>{pedido.distancia}</Text>
-                </View>
-                <View style={styles.detalheItem}>
-                  <FontAwesome5 name="dollar-sign" size={16} color="#666" />
-                  <Text style={styles.detalheText}>{pedido.valor}</Text>
-                </View>
+              <View style={styles.botoesContainer}>
+                <TouchableOpacity 
+                  style={[styles.botao, styles.botaoAceitar]} 
+                  onPress={() => handleAceitar(solicitacoes_pedidos.id)}
+                >
+                  <Text style={styles.botaoTexto}>Aceitar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.botao, styles.botaoRecusar]}
+                  onPress={() => handleRecusar(solicitacoes_pedidos.id)}
+                >
+                  <Text style={[styles.botaoTexto, styles.botaoTextoRecusar]}>Recusar</Text>
+                </TouchableOpacity>
               </View>
             </View>
-            <View style={styles.botoesContainer}>
-              <TouchableOpacity 
-                style={[styles.botao, styles.botaoAceitar]} 
-                onPress={() => handleAceitar(pedido.id)}
-              >
-                <Text style={styles.botaoTexto}>Aceitar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.botao, styles.botaoRecusar]}
-                onPress={() => handleRecusar(pedido.id)}
-              >
-                <Text style={[styles.botaoTexto, styles.botaoTextoRecusar]}>Recusar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
+          ))
+        )}
       </View>
     </ScrollView>
   );
