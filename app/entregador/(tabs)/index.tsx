@@ -1,3 +1,4 @@
+import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -19,14 +20,19 @@ export default function HomeEntregador() {
   const router = useRouter();
   const [pedidosDisponiveis, setPedidosDisponiveis] = useState<PedidoDisponivel[]>([]);
   const [carregando, setCarregando] = useState(true);
+  const [pedidosEmAndamento, setPedidosEmAndamento] = useState(0);
 
-  useEffect(()=>{buscarPedidosDisponiveis();}, []);
+  useEffect(()=>{
+    buscarPedidosDisponiveis();
+    buscarPedidosEmAndamento();
+  }, []);
 
   const buscarPedidosDisponiveis = async () => {
     setCarregando(true);
     const {data, error} = await supabase
     .from('solicitacoes_pedidos')
-    .select('*');
+    .select('*')
+    .eq('status', 'disponivel');
     
 
     if (error) {
@@ -35,6 +41,19 @@ export default function HomeEntregador() {
       setPedidosDisponiveis(data as PedidoDisponivel[]);
     }
     setCarregando(false);
+  }
+
+  const buscarPedidosEmAndamento = async () => {
+    const {data, error} = await supabase
+    .from('solicitacoes_pedidos')
+    .select('*')
+    .eq('status', 'disponivel');
+
+    if (error) {
+      console.error("Erro ao buscar pedidos em andamento: ", error.message);
+    } else {
+      setPedidosEmAndamento(data?.length || 0);
+    }
   }
 
   const aceitarPedidos = async (id: string) =>{
@@ -47,6 +66,8 @@ export default function HomeEntregador() {
       console.error('Erro ao aceitar pedido: ', error.message);
       return false;
     }
+    
+    await buscarPedidosEmAndamento();
     return true;
   };
 
@@ -78,7 +99,7 @@ export default function HomeEntregador() {
 
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
-          <Text style={styles.statNumber}>0</Text>
+          <Text style={styles.statNumber}>{pedidosEmAndamento}</Text>
           <Text style={styles.statLabel}>Entregas Hoje</Text>
         </View>
         <View style={styles.statCard}>
@@ -100,22 +121,22 @@ export default function HomeEntregador() {
               <View style={styles.pedidoInfo}>
                 <View style={styles.lojaRow}>
                   <FontAwesome5 name="store" size={16} color="#666" />
-                  <Text style={styles.lojaText}>{solicitacoes_pedidos.endereco}</Text>
+                  <Text style={styles.lojaText}>{solicitacoes_pedidos.loja}</Text>
                   {solicitacoes_pedidos.numero && (
                     <>
                       <FontAwesome5 name="search" size={16} color="#666" style={styles.icon} />
-                      <Text style={styles.pedidoNumero}>Pedido {solicitacoes_pedidos.numero}</Text>
+                      <Text style={styles.pedidoNumero}>Pedido #{solicitacoes_pedidos.numero}</Text>
                     </>
                   )}
                 </View>
                 <View style={styles.detalhesRow}>
                   <View style={styles.detalheItem}>
                     <FontAwesome5 name="map-marker-alt" size={16} color="#666" />
-                    <Text style={styles.detalheText}>{solicitacoes_pedidos.distancia}</Text>
+                    <Text style={styles.detalheText}>Distância: {solicitacoes_pedidos.distancia} km</Text>
                   </View>
                   <View style={styles.detalheItem}>
                     <FontAwesome5 name="dollar-sign" size={16} color="#666" />
-                    <Text style={styles.detalheText}>{solicitacoes_pedidos.valor}</Text>
+                    <Text style={styles.detalheText}>{solicitacoes_pedidos.valor} Reais</Text>
                   </View>
                 </View>
               </View>

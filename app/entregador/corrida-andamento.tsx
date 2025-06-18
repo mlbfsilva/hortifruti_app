@@ -7,6 +7,10 @@ export default function CorridaAndamento() {
   const router = useRouter();
   const { endereco, complemento } = useLocalSearchParams();
 
+  const handleConfirmar = () => {
+    router.push('/entregador/(tabs)');
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -42,10 +46,8 @@ export default function CorridaAndamento() {
 
         <TouchableOpacity 
           style={styles.botaoConfirmar}
-          onPress={() => {
-            // Implementar confirmação de entrega
-            console.log('Entrega confirmada');
-          }}
+          activeOpacity={0.8}
+          onPress={handleConfirmar}
         >
           <Text style={styles.botaoTexto}>CONFIRMAR</Text>
         </TouchableOpacity>
