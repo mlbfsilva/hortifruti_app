@@ -27,7 +27,7 @@ export default function HomeEntregador() {
     const {data, error} = await supabase
     .from('solicitacoes_pedidos')
     .select('*')
-
+    
 
     if (error) {
       console.error("Erro ao buscar pedidos: ", error.message);
@@ -102,10 +102,10 @@ export default function HomeEntregador() {
                   <FontAwesome5 name="store" size={16} color="#666" />
                   <Text style={styles.lojaText}>{solicitacoes_pedidos.endereco}</Text>
                   {solicitacoes_pedidos.numero && (
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <>
                       <FontAwesome5 name="search" size={16} color="#666" style={styles.icon} />
                       <Text style={styles.pedidoNumero}>Pedido {solicitacoes_pedidos.numero}</Text>
-                    </View>
+                    </>
                   )}
                 </View>
                 <View style={styles.detalhesRow}>
